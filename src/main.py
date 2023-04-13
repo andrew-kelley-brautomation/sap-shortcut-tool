@@ -14,13 +14,18 @@ def open_button_on_click():
 def mail_button_on_click():
     child = Toplevel(root)
     attach = IntVar()
+    subjLabel = Label(child, text="Subject:")
+    subj = Entry(child)
+    subj.insert(0, "L1 <> Customer")
     timeLabel = Label(child, text="Time Spent:")
     timeAmount = Entry(child)
     attachBox = Checkbutton(child, text="Attach Email to Ticket", variable=attach)
     attachBox.select()
-    timeLabel.grid(column=2, row=2)
-    timeAmount.grid(column=2, row=3)
-    attachBox.grid(column=2, row=4)
+    subjLabel.grid(column=2, row=2)
+    subj.grid(column=2, row=3)
+    timeLabel.grid(column=2, row=4)
+    timeAmount.grid(column=2, row=5)
+    attachBox.grid(column=2, row=6)
 
     def cont():
         try:
@@ -33,7 +38,7 @@ def mail_button_on_click():
 
 
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=cont)
-    contButton.grid(column=2, row=5)
+    contButton.grid(column=2, row=7)
 
 
 
