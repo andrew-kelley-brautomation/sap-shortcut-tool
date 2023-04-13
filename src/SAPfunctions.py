@@ -128,32 +128,32 @@ def trackTime():
 
 
 def displayTicket():
-    session = openSAP()
-    if session is None:
-        return
     ticketNum = simpledialog.askstring("SAP Shortcut Input", "Ticket Number:")
     if ticketNum is None:
+        return
+    session = openSAP()
+    if session is None:
         return
     session.SendCommand("/n*IW53 RIWO00-QMNUM=" + ticketNum)
     session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("CHRO", "Column01")
     session.findById("wnd[0]/shellcont/shell").clickLink("CHRO", "Column01")
 
 def changeTicket():
-    session = openSAP()
-    if session is None:
-        return
     ticketNum = simpledialog.askstring("SAP Shortcut Input", "Ticket Number:")
     if ticketNum is None:
+        return
+    session = openSAP()
+    if session is None:
         return
     session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticketNum)
 
 
 def mm03():
-    session = openSAP()
-    if session is None:
-        return
     modelNum = simpledialog.askstring("SAP Shortcut Input", "Model Number:")
     if modelNum is None:
+        return
+    session = openSAP()
+    if session is None:
         return
     session.SendCommand("/n*MM03 RMMG1-MATNR=" + modelNum)
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").GetAbsoluteRow(0).Selected = True
