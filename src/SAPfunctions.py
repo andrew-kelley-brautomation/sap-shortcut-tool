@@ -185,7 +185,6 @@ def zsupl4():
         return
     session.StartTransaction("ZSUPL4")
     session.findById("wnd[0]/usr/btn%_SO_INGRP_%_APP_%-VALU_PUSH").press()
-    # time.sleep(1)
     session.findById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "407"
     session.findById("wnd[1]/tbar[0]/btn[8]").press()
     session.findById("wnd[0]/tbar[1]/btn[8]").press()
@@ -196,7 +195,6 @@ def openSAP():
     try:
         SapGuiAuto = win32com.client.GetObject("SAPGUI")
     except Exception as e:
-        # ctypes.windll.user32.MessageBoxW(0, "Please log into SAP", "SAP Tool Error", 0)
         print(str(e))
         messagebox.showerror('SAP Shortcut Error', 'Please log in to SAP')
         return None
@@ -204,33 +202,23 @@ def openSAP():
         return None
     application = SapGuiAuto.GetScriptingEngine
     if not type(application) == win32com.client.CDispatch:
-        SapGuiAuto = None
         return None
     connection = application.Children(0)
     if not type(connection) == win32com.client.CDispatch:
-        application = None
-        SapGuiAuto = None
         return None
     numSessions = connection.Children.Count
     session = connection.Children(0)
     if not type(session) == win32com.client.CDispatch:
-        connection = None
-        application = None
-        SapGuiAuto = None
         return None
     if connection.Children.Count > 5:
         messagebox.showerror('SAP Shortcut Error', 'Too many sessions open.\nPlease close an unneeded window')
         return None
     session.CreateSession()
-    # time.sleep(1.5)
     while not (connection.Children.Count > numSessions):
         pass
     session = connection.Children(connection.Children.Count - 1)
     return session
 
 
-#-Main------------------------------------------------------------------
 if __name__ == "__main__":
-    # newTicket()
-    #   recordMail_Andrew()
     zsupl4()
