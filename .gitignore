@@ -1,3 +1,6 @@
 .idea/
 venv/
 src/__pycache__/
+util/dist
+util/build
+*.exe
