@@ -18,7 +18,7 @@ def newTicket():
     # messagebox.showinfo("waiting for action", "Please select customer")
     # print("Messagebox passed")
 
-def recordMail(timeSpent, attach):
+def recordMail(subject, timeSpent, attach):
     outlookObj = win32com.client.Dispatch('Outlook.Application')
     try:
         outlookItem = outlookObj.ActiveInspector().CurrentItem
@@ -45,7 +45,7 @@ def recordMail(timeSpent, attach):
     for ticket in tickets:
         session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
         session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
-        session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = "L1 <> Customer"
+        session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = subject
         session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
         if attach:
             session.findById("wnd[1]/tbar[0]/btn[14]").press()
@@ -63,7 +63,7 @@ def recordMail(timeSpent, attach):
     pathlib.Path(filepath + "emailForTicket.msg").unlink()
 
 
-def recordMail_Andrew(timeSpent, attach):
+def recordMail_Andrew(subject, timeSpent, attach):
     outlookObj = win32com.client.Dispatch('Outlook.Application')
     try:
         outlookItem = outlookObj.ActiveInspector().CurrentItem
@@ -89,7 +89,7 @@ def recordMail_Andrew(timeSpent, attach):
     for ticket in tickets:
         session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
         session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
-        session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = "L1 <> Customer"
+        session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = subject
         session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
         session.findById("wnd[1]/tbar[0]/btn[13]").press()
         session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent

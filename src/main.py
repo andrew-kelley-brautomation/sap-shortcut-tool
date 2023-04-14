@@ -30,8 +30,9 @@ def mail_button_on_click():
     def cont():
         try:
             timeSpent = int(timeAmount.get())
+            subjectText = subj.get()
             child.destroy()
-            recordMail(timeSpent, True if attach.get() == 1 else False)
+            recordMail(subjectText, timeSpent, True if attach.get() == 1 else False)
         except ValueError as e:
             errorLabel = Label(child, text="Please enter a time quantity", fg="red")
             errorLabel.grid(column=2, row=1)
