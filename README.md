@@ -2,6 +2,15 @@
 Tool to speed up the processing of tasks in SAP
 
 ---
+## A note on Outlook
+Outlook does not allow programmatic access to replies that are being typed inside the main Outlook window.
+You must pop-out your replies for the tool to see them.
+This can be configured to happen by default in the Outlook Options
+
+![outlook_options.png](assets/outlook_options.png)
+
+
+---
 ## Installation Instructions
 1. Clone the repo onto your local harddrive.
 2. Execute the Windows batch file createexe_noprompt.bat under the util directory.
