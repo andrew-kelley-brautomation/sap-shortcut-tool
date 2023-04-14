@@ -31,6 +31,7 @@ def recordMail(timeSpent, attach):
         messagebox.showerror("SAP Shortcut Error", "Current Outlook Item Not An Email")
         return
     tickets = re.findall('400\d{6}', outlookItem.Subject)
+    emailBody = outlookItem.Body
     if len(tickets) < 1:
         messagebox.showerror("SAP Shortcut Error", "No ticket in subject line")
         return
@@ -45,7 +46,7 @@ def recordMail(timeSpent, attach):
         session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
         session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
         session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = "L1 <> Customer"
-        session.findById("wnd[1]/usr/cntlMAIL/shell").text = outlookItem.Body
+        session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
         if attach:
             session.findById("wnd[1]/tbar[0]/btn[14]").press()
             session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
@@ -75,6 +76,7 @@ def recordMail_Andrew(timeSpent, attach):
         messagebox.showerror("SAP Shortcut Error", "Current Outlook Item Not An Email")
         return
     tickets = re.findall('400\d{6}', outlookItem.Subject)
+    emailBody = outlookItem.Body
     if len(tickets) < 1:
         messagebox.showerror("SAP Shortcut Error", "No ticket in subject line")
         return
@@ -88,7 +90,7 @@ def recordMail_Andrew(timeSpent, attach):
         session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
         session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
         session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = "L1 <> Customer"
-        session.findById("wnd[1]/usr/cntlMAIL/shell").text = outlookItem.Body
+        session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
         session.findById("wnd[1]/tbar[0]/btn[13]").press()
         session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
         session.findById("wnd[1]/tbar[0]/btn[15]").press()
