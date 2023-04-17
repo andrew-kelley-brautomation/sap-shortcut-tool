@@ -4,3 +4,5 @@ src/__pycache__/
 util/dist
 util/build
 *.exe
+*.spec
+util/createexe_noprompt.bat
