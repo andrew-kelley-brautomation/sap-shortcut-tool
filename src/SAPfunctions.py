@@ -18,52 +18,8 @@ def newTicket():
     # messagebox.showinfo("waiting for action", "Please select customer")
     # print("Messagebox passed")
 
+
 def recordMail(subject, timeSpent, attach):
-    outlookObj = win32com.client.Dispatch('Outlook.Application')
-    try:
-        outlookItem = outlookObj.ActiveInspector().CurrentItem
-    except:
-        try:
-            outlookItem = outlookObj.ActiveExplorer().Selection.Item(1)
-        except:
-            outlookItem = None
-    if outlookItem is None or outlookItem.Class != 43:
-        messagebox.showerror("SAP Shortcut Error", "Current Outlook Item Not An Email")
-        return
-    tickets = re.findall('400\d{6}', outlookItem.Subject)
-    emailBody = outlookItem.Body
-    if len(tickets) < 1:
-        messagebox.showerror("SAP Shortcut Error", "No ticket in subject line")
-        return
-    filepath = "C:/Temp/SAPEmails/"
-    pathlib.Path(filepath).mkdir(parents=True, exist_ok=True)
-    outlookItem.SaveAs(filepath + "emailForTicket.msg", 3)
-    pythoncom.CoInitialize()
-    session = openSAP()
-    if session is None:
-        return
-    for ticket in tickets:
-        session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-        session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
-        session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = subject
-        session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
-        if attach:
-            session.findById("wnd[1]/tbar[0]/btn[14]").press()
-            session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
-            session.findById("wnd[3]/usr/txtDY_PATH").text = filepath
-            session.findById("wnd[3]/usr/txtDY_FILENAME").text = "emailForTicket.msg"
-            session.findById("wnd[3]/tbar[0]/btn[0]").press()
-            session.findById("wnd[2]/tbar[0]/btn[13]").press()
-        session.findById("wnd[1]/tbar[0]/btn[13]").press()
-        session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
-        session.findById("wnd[1]/tbar[0]/btn[15]").press()
-        session.findById("wnd[0]/tbar[0]/btn[11]").press()
-    session.EndTransaction()
-    session.findById("wnd[0]/tbar[0]/btn[15]").press()
-    pathlib.Path(filepath + "emailForTicket.msg").unlink()
-
-
-def recordMail_Andrew(subject, timeSpent, attach):
     outlookObj = win32com.client.Dispatch('Outlook.Application')
     try:
         outlookItem = outlookObj.ActiveInspector().CurrentItem
