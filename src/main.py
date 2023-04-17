@@ -1,11 +1,12 @@
+import configparser
 from tkinter import *
 from SAPfunctions import *
+import parseConfig
 
 root = Tk()
 
 root.title("SAP Shortcuts")
 root.geometry("348x79")
-
 
 def open_button_on_click():
     newTicket()
@@ -16,11 +17,14 @@ def mail_button_on_click():
     attach = IntVar()
     subjLabel = Label(child, text="Subject:")
     subj = Entry(child)
-    subj.insert(0, "L1 <> Customer")
+    mailSettings = parseConfig.parseConfig()['MAIL']
+    subj.insert(0, mailSettings.get('DEFAULT_SUBJECT', "L1 <> Customer"))
     timeLabel = Label(child, text="Time Spent:")
     timeAmount = Entry(child)
+    timeAmount.insert(0, mailSettings.getint('DEFAULT_TIME', 5))
     attachBox = Checkbutton(child, text="Attach Email to Ticket", variable=attach)
-    attachBox.select()
+    if mailSettings.getboolean('DEFAULT_ATTACH'):
+        attachBox.select()
     subjLabel.grid(column=2, row=2)
     subj.grid(column=2, row=3)
     timeLabel.grid(column=2, row=4)
