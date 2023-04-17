@@ -27,7 +27,7 @@ def mail_button_on_click():
     timeAmount.grid(column=2, row=5)
     attachBox.grid(column=2, row=6)
 
-    def cont():
+    def cont(event):
         try:
             timeSpent = int(timeAmount.get())
             subjectText = subj.get()
@@ -37,7 +37,7 @@ def mail_button_on_click():
             errorLabel = Label(child, text="Please enter a time quantity", fg="red")
             errorLabel.grid(column=2, row=1)
 
-
+    child.bind("<Return>", cont)
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=cont)
     contButton.grid(column=2, row=7)
 
