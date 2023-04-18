@@ -1,10 +1,14 @@
 from tkinter import *
 from SAPfunctions import *
+from settings import *
 
 root = Tk()
 
 root.title("SAP Shortcuts")
 root.geometry("348x79")
+
+initSettings = SAP_Settings()
+
 
 
 def open_button_on_click():
@@ -16,9 +20,10 @@ def mail_button_on_click():
     attach = IntVar()
     subjLabel = Label(child, text="Subject:")
     subj = Entry(child)
-    subj.insert(0, "L1 <> Customer")
+    subj.insert(0, initSettings.defaultRecordMailSubject)
     timeLabel = Label(child, text="Time Spent:")
     timeAmount = Entry(child)
+    timeAmount.insert(0, initSettings.defaultRecordMailTime)
     attachBox = Checkbutton(child, text="Attach Email to Ticket", variable=attach)
     attachBox.select()
     subjLabel.grid(column=2, row=2)
@@ -67,21 +72,31 @@ def solution_button_on_click():
     child = Toplevel(root)
     tktLabel = Label(child, text="Ticket Number:")
     tktNum = Entry(child)
+    timeLabel = Label(child, text="Time Spent:")
+    timeAmount = Entry(child)
+    timeAmount.insert(0, initSettings.defaultSolutionTime)
     solLabel = Label(child, text="Solution:")
     solution = Text(child, width=60, height=10)
     tktLabel.grid(column=2, row=1)
     tktNum.grid(column=2, row=2)
-    solLabel.grid(column=2, row=3)
-    solution.grid(column=2, row=4)
+    timeLabel.grid(column=2, row=3)
+    timeAmount.grid(column=2, row=4)
+    solLabel.grid(column=2, row=5)
+    solution.grid(column=2, row=6)
+    
 
     def ticket_solution():
         ticketNum = tktNum.get()
         solutionText = solution.get("1.0", END)
+        try:
+            timeSpent = int(timeAmount.get())
+        except ValueError as e:
+            timeSpent = 5
         child.destroy()
-        addTicketSolution(ticketNum, solutionText)
+        addTicketSolution(ticketNum, solutionText, timeSpent)
 
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=ticket_solution)
-    contButton.grid(column=2, row=5)
+    contButton.grid(column=2, row=7)
 
 
 buttonWidth = 15

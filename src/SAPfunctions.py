@@ -118,7 +118,7 @@ def mm03():
     session.findById("wnd[1]/tbar[0]/btn[0]").press()
 
 
-def addTicketSolution(ticket, solution):
+def addTicketSolution(ticket, solution, timeSpent):
     session = openSAP()
     if session is None:
         return
@@ -127,7 +127,7 @@ def addTicketSolution(ticket, solution):
     session.findById("wnd[1]/usr/txtN_QMSM-MATXT").text = "Solution"
     session.findById("wnd[1]/usr/cntlLOESUNG/shell").text = solution
     session.findById("wnd[1]/tbar[0]/btn[13]").press()
-    session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = 5
+    session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
     session.findById("wnd[1]/tbar[0]/btn[15]").press()
     session.findById("wnd[0]/tbar[0]/btn[11]").press()
     session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
