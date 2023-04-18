@@ -19,7 +19,7 @@ def newTicket():
     # print("Messagebox passed")
 
 
-def recordMail(subject, timeSpent, attach):
+def recordMail(subject, timeSpent, attach, type):
     outlookObj = win32com.client.Dispatch('Outlook.Application')
     try:
         outlookItem = outlookObj.ActiveInspector().CurrentItem
@@ -49,24 +49,26 @@ def recordMail(subject, timeSpent, attach):
         session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
         session.findById("wnd[1]/tbar[0]/btn[13]").press()
         session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
-        session.findById("wnd[1]/tbar[0]/btn[15]").press()
-        session.findById("wnd[0]/tbar[0]/btn[11]").press()
-        if attach:
-            session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-            session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("ATAD", "Column01")
-            session.findById("wnd[0]/shellcont/shell").clickLink("ATAD", "Column01")
-            session.findById("wnd[1]/usr/chk[2,7]").selected = True
-            session.findById("wnd[1]/tbar[0]/btn[18]").press()
-            session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
-            session.findById("wnd[3]/usr/txtDY_PATH").text = filepath
-            session.findById("wnd[3]/usr/txtDY_FILENAME").text = "emailForTicket.msg"
-            session.findById("wnd[3]/tbar[0]/btn[0]").press()
-            session.findById("wnd[2]/tbar[0]/btn[13]").press()
-            session.findById("wnd[1]/tbar[0]/btn[13]").press()
-            session.findById("wnd[0]/tbar[0]/btn[11]").press()
-    session.EndTransaction()
-    session.findById("wnd[0]/tbar[0]/btn[15]").press()
-    pathlib.Path(filepath + "emailForTicket.msg").unlink()
+        if type != "00":
+            session.findById("wnd[1]/usr/cmbZCATS_TS_EVAL_NOTIFICATION-ZEVAL_TYPE").Key = type
+    #     session.findById("wnd[1]/tbar[0]/btn[15]").press()
+    #     session.findById("wnd[0]/tbar[0]/btn[11]").press()
+    #     if attach:
+    #         session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
+    #         session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("ATAD", "Column01")
+    #         session.findById("wnd[0]/shellcont/shell").clickLink("ATAD", "Column01")
+    #         session.findById("wnd[1]/usr/chk[2,7]").selected = True
+    #         session.findById("wnd[1]/tbar[0]/btn[18]").press()
+    #         session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
+    #         session.findById("wnd[3]/usr/txtDY_PATH").text = filepath
+    #         session.findById("wnd[3]/usr/txtDY_FILENAME").text = "emailForTicket.msg"
+    #         session.findById("wnd[3]/tbar[0]/btn[0]").press()
+    #         session.findById("wnd[2]/tbar[0]/btn[13]").press()
+    #         session.findById("wnd[1]/tbar[0]/btn[13]").press()
+    #         session.findById("wnd[0]/tbar[0]/btn[11]").press()
+    # session.EndTransaction()
+    # session.findById("wnd[0]/tbar[0]/btn[15]").press()
+    # pathlib.Path(filepath + "emailForTicket.msg").unlink()
 
 
 def trackTime():
@@ -180,4 +182,4 @@ def openSAP():
 
 
 if __name__ == "__main__":
-    zsupl4()
+    recordMail("L1 <> Customer", 5, False, 3)
