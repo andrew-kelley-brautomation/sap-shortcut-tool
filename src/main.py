@@ -38,7 +38,7 @@ def mail_button_on_click():
     child = Toplevel(root)
     attach = IntVar()
     subjLabel = Label(child, text="Subject:")
-    subj = Entry(child)
+    subj = Entry(child, width=40)
     subj.insert(0, "L1 <> Customer")
     timeLabel = Label(child, text="Time Spent:")
     timeAmount = Entry(child)
@@ -61,16 +61,19 @@ def mail_button_on_click():
         try:
             timeSpent = int(timeAmount.get())
             subjectText = subj.get()
-            child.destroy()
-            recordMail(subjectText, timeSpent, True if attach.get() == 1 else False, sapTypes.get(selectedType.get()))
+            if len(subjectText) <= 40:
+                child.destroy()
+                recordMail(subjectText, timeSpent, True if attach.get() == 1 else False, sapTypes.get(selectedType.get()))
+            else:
+                errorLabel = Label(child, text="Subject must be less than 40 characters", fg="red")
+                errorLabel.grid(column=2, row=1)
         except ValueError as e:
-            errorLabel = Label(child, text="Please enter a time quantity", fg="red")
+            errorLabel = Label(child, text="Please enter an integer time quantity", fg="red")
             errorLabel.grid(column=2, row=1)
 
     child.bind("<Return>", cont)
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=cont)
     contButton.grid(column=2, row=8)
-
 
 
 def time_tracking_on_click():
