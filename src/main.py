@@ -27,7 +27,7 @@ def mail_button_on_click():
     timeAmount.grid(column=2, row=5)
     attachBox.grid(column=2, row=6)
 
-    def cont(event):
+    def cont(event=None):
         try:
             timeSpent = int(timeAmount.get())
             subjectText = subj.get()
