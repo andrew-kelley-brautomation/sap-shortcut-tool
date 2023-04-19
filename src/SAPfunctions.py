@@ -19,7 +19,7 @@ def newTicket():
     # print("Messagebox passed")
 
 
-def recordMail(subject, timeSpent, attach):
+def recordMail(subject, timeSpent, attach, type):
     outlookObj = win32com.client.Dispatch('Outlook.Application')
     try:
         outlookItem = outlookObj.ActiveInspector().CurrentItem
@@ -49,6 +49,8 @@ def recordMail(subject, timeSpent, attach):
         session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
         session.findById("wnd[1]/tbar[0]/btn[13]").press()
         session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
+        if type != "00":
+            session.findById("wnd[1]/usr/cmbZCATS_TS_EVAL_NOTIFICATION-ZEVAL_TYPE").Key = type
         session.findById("wnd[1]/tbar[0]/btn[15]").press()
         session.findById("wnd[0]/tbar[0]/btn[11]").press()
         if attach:
@@ -180,4 +182,4 @@ def openSAP():
 
 
 if __name__ == "__main__":
-    zsupl4()
+    recordMail("L1 <> Customer", 5, False, 3)
