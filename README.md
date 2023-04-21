@@ -37,3 +37,7 @@ This button quickly opens the ZSUPL4 transaction with the planner groups 465 (US
 ---
 ## Useful Utility
 I find it useful to use [PowerToys](https://learn.microsoft.com/en-us/windows/powertoys/) to keep the main window always available on my screen.
+
+---
+## Contributions
+Special thanks to Chris Hairston for his contributions to this project
