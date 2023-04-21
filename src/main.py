@@ -1,6 +1,7 @@
 import configparser
 from tkinter import *
 from tkinter import font
+from tkinter.ttk import Combobox
 from SAPfunctions import *
 import math
 import parseConfig
@@ -23,10 +24,31 @@ def open_button_on_click():
 
 
 def mail_button_on_click():
+    sapTypes = {
+        "Do not change": "00",
+        "User Application Bug": "01",
+        "Product Request": "02",
+        "Hardware Question": "03",
+        "Software Question": "04",
+        "Guidance (Beratung)": "05",
+        "System Software Bug": "06",
+        "Hardware Bug (Single Failure)": "07",
+        "Hardware Bug (Series Failure)": "08",
+        "Documentation Missing, Insufficient, or Bug": "09",
+        "Licensing Issue": "10",
+        "Refer To Documentation": "11",
+        "Prototype / Beta Support": "12",
+        "No Rating Possible": "15",
+        "Homepage (Downloads, Links)": "16",
+        "Q-Reports": "20",
+        "Q-Figures": "21",
+        "Q-Management": "22",
+        "Delivery Issues": "23",
+    }
     child = Toplevel(root)
     attach = IntVar()
     subjLabel = Label(child, text="Subject:", font=scaledFont)
-    subj = Entry(child)
+    subj = Entry(child, font=scaledFont)
     mailSettings = parseConfig.parseConfig()['MAIL']
     subj.insert(0, mailSettings.get('DEFAULT_SUBJECT', "L1 <> Customer"))
     timeLabel = Label(child, text="Time Spent:", font=scaledFont)
@@ -40,21 +62,31 @@ def mail_button_on_click():
     timeLabel.grid(column=2, row=4)
     timeAmount.grid(column=2, row=5)
     attachBox.grid(column=2, row=6)
+    selectedType = StringVar()
+    typeSelector = Combobox(child, textvariable=selectedType, width=40)
+    print(list(sapTypes.keys()))
+    typeSelector['values'] = list(sapTypes.keys())
+    typeSelector['state'] = 'readonly'
+    typeSelector.current(0)
+    typeSelector.grid(column=2, row=7)
 
-    def cont():
+    def cont(event=None):
         try:
             timeSpent = int(timeAmount.get())
             subjectText = subj.get()
-            child.destroy()
-            recordMail(subjectText, timeSpent, True if attach.get() == 1 else False)
+            if len(subjectText) <= 40:
+                child.destroy()
+                recordMail(subjectText, timeSpent, True if attach.get() == 1 else False, sapTypes.get(selectedType.get()))
+            else:
+                errorLabel = Label(child, text="Subject must be less than 40 characters", fg="red")
+                errorLabel.grid(column=2, row=1)
         except ValueError as e:
-            errorLabel = Label(child, text="Please enter a time quantity", fg="red", font=scaledFont)
+            errorLabel = Label(child, text="Please enter an integer time quantity", fg="red", font=scaledFont)
             errorLabel.grid(column=2, row=1)
 
-
+    child.bind("<Return>", cont)
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=cont, font=scaledFont)
-    contButton.grid(column=2, row=7)
-
+    contButton.grid(column=2, row=8)
 
 
 def time_tracking_on_click():
