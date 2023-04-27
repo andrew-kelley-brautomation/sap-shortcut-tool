@@ -24,6 +24,7 @@ def open_button_on_click():
 
 
 def mail_button_on_click():
+
     sapTypes = {
         "Do not change": "00",
         "User Application Bug": "01",
@@ -47,10 +48,11 @@ def mail_button_on_click():
     }
     child = Toplevel(root)
     attach = IntVar()
-    subjLabel = Label(child, text="Subject:", font=scaledFont)
+    subjLabel = Label(child, font=scaledFont)
     subj = Entry(child, font=scaledFont)
     mailSettings = parseConfig.parseConfig()['MAIL']
     subj.insert(0, mailSettings.get('DEFAULT_SUBJECT', "L1 <> Customer"))
+    subjLabel.config(text=f"Subject: ({len(subj.get())}/40)")
     timeLabel = Label(child, text="Time Spent:", font=scaledFont)
     timeAmount = Entry(child, font=scaledFont)
     timeAmount.insert(0, mailSettings.getint('DEFAULT_TIME', 5))
@@ -69,6 +71,22 @@ def mail_button_on_click():
     typeSelector['state'] = 'readonly'
     typeSelector.current(0)
     typeSelector.grid(column=2, row=7)
+    errorLabel = Label(child, fg="red")
+
+    def validate_subject(subject):
+        subjLabel.config(text=f"Subject: ({len(subject)}/40)")
+        if len(subject) > 40:
+            errorLabel.config(text="Subject must be less than 40 characters")
+            errorLabel.grid(column=2, row=1)
+            if mailSettings.getboolean('STOP_AT_FORTY', False):
+                return False
+        else:
+            errorLabel.grid_remove()
+        return True
+
+    # if mailSettings.getboolean('STOP_AT_FORTY', False):
+    validation = root.register(validate_subject)
+    subj.config(validate="key", validatecommand=(validation, '%P'))
 
     def cont(event=None):
         try:
@@ -76,12 +94,13 @@ def mail_button_on_click():
             subjectText = subj.get()
             if len(subjectText) <= 40:
                 child.destroy()
-                recordMail(subjectText, timeSpent, True if attach.get() == 1 else False, sapTypes.get(selectedType.get()))
+                recordMail(subjectText, timeSpent, True if attach.get() == 1 else False,
+                           sapTypes.get(selectedType.get()))
             else:
-                errorLabel = Label(child, text="Subject must be less than 40 characters", fg="red")
+                errorLabel.config(text=f"Subject must be less than 40 characters (Currently: {len(subjectText)})")
                 errorLabel.grid(column=2, row=1)
         except ValueError as e:
-            errorLabel = Label(child, text="Please enter an integer time quantity", fg="red", font=scaledFont)
+            errorLabel.config(text="Please enter an integer time quantity")
             errorLabel.grid(column=2, row=1)
 
     child.bind("<Return>", cont)
