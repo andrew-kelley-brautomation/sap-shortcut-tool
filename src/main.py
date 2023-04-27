@@ -116,6 +116,10 @@ def solution_button_on_click():
     tktNum = Entry(child, font=scaledFont)
     timeLabel = Label(child, text="Time Spent:", font=scaledFont)
     timeAmount = Entry(child)
+    close = IntVar()
+    closeBox = Checkbutton(child, text="Close Ticket", variable=close, font=scaledFont)
+    if solutionSettings.getboolean('DEFAULT_CLOSE'):
+        closeBox.select()
     timeAmount.insert(0, solutionSettings.getint('DEFAULT_TIME', 5))
     solLabel = Label(child, text="Solution:", font=scaledFont)
     solution = Text(child, width=60, height=10, font=scaledFont)
@@ -123,8 +127,9 @@ def solution_button_on_click():
     tktNum.grid(column=2, row=2)
     timeLabel.grid(column=2, row=3)
     timeAmount.grid(column=2, row=4)
-    solLabel.grid(column=2, row=5)
-    solution.grid(column=2, row=6)
+    closeBox.grid(column=2, row=5)
+    solLabel.grid(column=2, row=6)
+    solution.grid(column=2, row=7)
 
     def ticket_solution():
         ticketNum = tktNum.get()
@@ -134,10 +139,10 @@ def solution_button_on_click():
         except ValueError as e:
             timeSpent = 5
         child.destroy()
-        addTicketSolution(ticketNum, solutionText, timeSpent)
+        addTicketSolution(ticketNum, solutionText, timeSpent, True if close.get() == 1 else False)
 
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=ticket_solution, font=scaledFont)
-    contButton.grid(column=2, row=7)
+    contButton.grid(column=2, row=8)
 
 
 buttonWidth = 15
