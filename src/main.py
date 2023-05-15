@@ -1,4 +1,5 @@
 import configparser
+import subprocess
 from tkinter import *
 from tkinter import font
 from tkinter.ttk import Combobox
@@ -140,6 +141,10 @@ def solution_button_on_click():
     contButton.grid(column=2, row=7)
 
 
+def settings_button_on_click():
+    subprocess.Popen(["notepad.exe", "C:/SAP Shortcut Tool/config.ini"])
+
+
 buttonWidth = 15
 buttonHeight = 1
 
@@ -174,5 +179,9 @@ solButton.grid(column=2, row=4)
 zsupl4Button = Button(root, text="Ticket List", fg="blue", height=buttonHeight,
                       width=buttonWidth, command=zsupl4_button_on_click, font=scaledFont)
 zsupl4Button.grid(column=3, row=4)
+
+settingsButton = Button(root, text="Edit Settings", fg="blue", height=buttonHeight,
+                      width=buttonWidth, command=settings_button_on_click, font=scaledFont)
+settingsButton.grid(column=4, row=4)
 
 root.mainloop()
