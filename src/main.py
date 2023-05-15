@@ -1,4 +1,5 @@
 import configparser
+import subprocess
 from tkinter import *
 from tkinter import font
 from tkinter.ttk import Combobox
@@ -24,6 +25,7 @@ def open_button_on_click():
 
 
 def mail_button_on_click():
+
     sapTypes = {
         "Do not change": "00",
         "User Application Bug": "01",
@@ -47,10 +49,11 @@ def mail_button_on_click():
     }
     child = Toplevel(root)
     attach = IntVar()
-    subjLabel = Label(child, text="Subject:", font=scaledFont)
+    subjLabel = Label(child, font=scaledFont)
     subj = Entry(child, font=scaledFont)
     mailSettings = parseConfig.parseConfig()['MAIL']
     subj.insert(0, mailSettings.get('DEFAULT_SUBJECT', "L1 <> Customer"))
+    subjLabel.config(text=f"Subject: ({len(subj.get())}/40)")
     timeLabel = Label(child, text="Time Spent:", font=scaledFont)
     timeAmount = Entry(child, font=scaledFont)
     timeAmount.insert(0, mailSettings.getint('DEFAULT_TIME', 5))
@@ -69,6 +72,22 @@ def mail_button_on_click():
     typeSelector['state'] = 'readonly'
     typeSelector.current(0)
     typeSelector.grid(column=2, row=7)
+    errorLabel = Label(child, fg="red")
+
+    def validate_subject(subject):
+        subjLabel.config(text=f"Subject: ({len(subject)}/40)")
+        if len(subject) > 40:
+            errorLabel.config(text="Subject must be less than 40 characters")
+            errorLabel.grid(column=2, row=1)
+            if mailSettings.getboolean('STOP_AT_FORTY', False):
+                return False
+        else:
+            errorLabel.grid_remove()
+        return True
+
+    # if mailSettings.getboolean('STOP_AT_FORTY', False):
+    validation = root.register(validate_subject)
+    subj.config(validate="key", validatecommand=(validation, '%P'))
 
     def cont(event=None):
         try:
@@ -76,12 +95,13 @@ def mail_button_on_click():
             subjectText = subj.get()
             if len(subjectText) <= 40:
                 child.destroy()
-                recordMail(subjectText, timeSpent, True if attach.get() == 1 else False, sapTypes.get(selectedType.get()))
+                recordMail(subjectText, timeSpent, True if attach.get() == 1 else False,
+                           sapTypes.get(selectedType.get()))
             else:
-                errorLabel = Label(child, text="Subject must be less than 40 characters", fg="red")
+                errorLabel.config(text=f"Subject must be less than 40 characters (Currently: {len(subjectText)})")
                 errorLabel.grid(column=2, row=1)
         except ValueError as e:
-            errorLabel = Label(child, text="Please enter an integer time quantity", fg="red", font=scaledFont)
+            errorLabel.config(text="Please enter an integer time quantity")
             errorLabel.grid(column=2, row=1)
 
     child.bind("<Return>", cont)
@@ -116,6 +136,10 @@ def solution_button_on_click():
     tktNum = Entry(child, font=scaledFont)
     timeLabel = Label(child, text="Time Spent:", font=scaledFont)
     timeAmount = Entry(child)
+    close = IntVar()
+    closeBox = Checkbutton(child, text="Close Ticket", variable=close, font=scaledFont)
+    if solutionSettings.getboolean('DEFAULT_CLOSE'):
+        closeBox.select()
     timeAmount.insert(0, solutionSettings.getint('DEFAULT_TIME', 5))
     solLabel = Label(child, text="Solution:", font=scaledFont)
     solution = Text(child, width=60, height=10, font=scaledFont)
@@ -123,8 +147,9 @@ def solution_button_on_click():
     tktNum.grid(column=2, row=2)
     timeLabel.grid(column=2, row=3)
     timeAmount.grid(column=2, row=4)
-    solLabel.grid(column=2, row=5)
-    solution.grid(column=2, row=6)
+    closeBox.grid(column=2, row=5)
+    solLabel.grid(column=2, row=6)
+    solution.grid(column=2, row=7)
 
     def ticket_solution():
         ticketNum = tktNum.get()
@@ -134,10 +159,14 @@ def solution_button_on_click():
         except ValueError as e:
             timeSpent = 5
         child.destroy()
-        addTicketSolution(ticketNum, solutionText, timeSpent)
+        addTicketSolution(ticketNum, solutionText, timeSpent, True if close.get() == 1 else False)
 
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=ticket_solution, font=scaledFont)
-    contButton.grid(column=2, row=7)
+    contButton.grid(column=2, row=8)
+
+
+def settings_button_on_click():
+    subprocess.Popen(["notepad.exe", "C:/SAP Shortcut Tool/config.ini"])
 
 
 buttonWidth = 15
@@ -174,5 +203,9 @@ solButton.grid(column=2, row=4)
 zsupl4Button = Button(root, text="Ticket List", fg="blue", height=buttonHeight,
                       width=buttonWidth, command=zsupl4_button_on_click, font=scaledFont)
 zsupl4Button.grid(column=3, row=4)
+
+settingsButton = Button(root, text="Edit Settings", fg="blue", height=buttonHeight,
+                      width=buttonWidth, command=settings_button_on_click, font=scaledFont)
+settingsButton.grid(column=4, row=4)
 
 root.mainloop()

@@ -7,12 +7,14 @@ configSettings = {
         "DEFAULT_SUBJECT": "L1 <> Customer",
         "DEFAULT_TIME": "5",
         "DEFAULT_ATTACH": "True",
+        "STOP_AT_FORTY": "True",
     },
     "GRAPHICS": {
         "SCALING": "1",
     },
     "SOLUTION": {
         "DEFAULT_TIME": "5",
+        "DEFAULT_CLOSE": "True",
     },
 }
 
