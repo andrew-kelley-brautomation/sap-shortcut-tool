@@ -120,7 +120,7 @@ def mm03():
     session.findById("wnd[1]/tbar[0]/btn[0]").press()
 
 
-def addTicketSolution(ticket, solution, timeSpent):
+def addTicketSolution(ticket, solution, timeSpent, close):
     session = openSAP()
     if session is None:
         return
@@ -132,11 +132,12 @@ def addTicketSolution(ticket, solution, timeSpent):
     session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
     session.findById("wnd[1]/tbar[0]/btn[15]").press()
     session.findById("wnd[0]/tbar[0]/btn[11]").press()
-    session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-    session.findById("wnd[0]/shellcont/shell").clickLink("ABGE", "Column01")
-    if session.Children.Count > 1:
-        session.findById("wnd[1]/usr/btnBUTTON_1").press()
-    session.findById("wnd[0]/tbar[0]/btn[11]").press()
+    if close:
+        session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
+        session.findById("wnd[0]/shellcont/shell").clickLink("ABGE", "Column01")
+        if session.Children.Count > 1:
+            session.findById("wnd[1]/usr/btnBUTTON_1").press()
+        session.findById("wnd[0]/tbar[0]/btn[11]").press()
 
 
 def zsupl4():

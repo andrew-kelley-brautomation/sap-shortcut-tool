@@ -13,6 +13,7 @@ configSettings = {
     },
     "SOLUTION": {
         "DEFAULT_TIME": "5",
+        "DEFAULT_CLOSE": "True",
     },
 }
 
