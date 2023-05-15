@@ -1,5 +1,6 @@
 import pathlib
 import re
+import time
 from tkinter import messagebox, simpledialog
 import pythoncom
 import win32com.client
@@ -7,16 +8,22 @@ import win32gui
 
 
 def newTicket():
-    pythoncom.CoInitialize()
-    session = openSAP()
-    if session is None:
-        return
-    session.sendCommand("/n*IW51 RIWO00-QMART=P1")
-    while session.findById("wnd[0]").Text != "Create Service Notification: Initial Screen":
-        pass
-    win32gui.SetForegroundWindow(win32gui.FindWindow(None, 'please choose partners for notification'))
-    # messagebox.showinfo("waiting for action", "Please select customer")
-    # print("Messagebox passed")
+    try:
+        pythoncom.CoInitialize()
+        session = openSAP()
+        if session is None:
+            return
+        session.sendCommand("/n*IW51 RIWO00-QMART=P1")
+        while session.findById("wnd[0]").Text != "Create Service Notification: Initial Screen":
+            pass
+        win32gui.SetForegroundWindow(win32gui.FindWindow(None, 'please choose partners for notification'))
+        # messagebox.showinfo("waiting for action", "Please select customer")
+        # print("Messagebox passed")
+    except Exception as e:
+        if session.findById("wnd[0]/sbar").Text != "":
+            messagebox.showerror("SAP Tool", session.findById("wnd[0]/sbar").Text)
+        else:
+            messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 
 def recordMail(subject, timeSpent, attach, type):
@@ -39,116 +46,164 @@ def recordMail(subject, timeSpent, attach, type):
     filepath = "C:/Temp/SAPEmails/"
     pathlib.Path(filepath).mkdir(parents=True, exist_ok=True)
     outlookItem.SaveAs(filepath + "emailForTicket.msg", 3)
-    session = openSAP()
-    if session is None:
-        return
-    for ticket in tickets:
-        session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-        session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
-        session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = subject
-        session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
-        session.findById("wnd[1]/tbar[0]/btn[13]").press()
-        session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
-        if type != "00":
-            session.findById("wnd[1]/usr/cmbZCATS_TS_EVAL_NOTIFICATION-ZEVAL_TYPE").Key = type
-        session.findById("wnd[1]/tbar[0]/btn[15]").press()
-        session.findById("wnd[0]/tbar[0]/btn[11]").press()
-        if attach:
+    try:
+        session = openSAP()
+        if session is None:
+            return
+        for ticket in tickets:
             session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-            session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("ATAD", "Column01")
-            session.findById("wnd[0]/shellcont/shell").clickLink("ATAD", "Column01")
-            session.findById("wnd[1]/usr/chk[2,7]").selected = True
-            session.findById("wnd[1]/tbar[0]/btn[18]").press()
-            session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
-            session.findById("wnd[3]/usr/txtDY_PATH").text = filepath
-            session.findById("wnd[3]/usr/txtDY_FILENAME").text = "emailForTicket.msg"
-            session.findById("wnd[3]/tbar[0]/btn[0]").press()
-            session.findById("wnd[2]/tbar[0]/btn[13]").press()
+            session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
+            session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = subject
+            session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
             session.findById("wnd[1]/tbar[0]/btn[13]").press()
+            session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
+            if type != "00":
+                session.findById("wnd[1]/usr/cmbZCATS_TS_EVAL_NOTIFICATION-ZEVAL_TYPE").Key = type
+            session.findById("wnd[1]/tbar[0]/btn[15]").press()
             session.findById("wnd[0]/tbar[0]/btn[11]").press()
-    session.EndTransaction()
-    session.findById("wnd[0]/tbar[0]/btn[15]").press()
+            if session.Children.Count > 1:
+                session.findById("wnd[1]/usr/btnBUTTON_1").press()
+            if attach:
+                session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
+                session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("ATAD", "Column01")
+                session.findById("wnd[0]/shellcont/shell").clickLink("ATAD", "Column01")
+                session.findById("wnd[1]/usr/chk[2,7]").selected = True
+                session.findById("wnd[1]/tbar[0]/btn[18]").press()
+                session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
+                session.findById("wnd[3]/usr/txtDY_PATH").text = filepath
+                session.findById("wnd[3]/usr/txtDY_FILENAME").text = "emailForTicket.msg"
+                session.findById("wnd[3]/tbar[0]/btn[0]").press()
+                session.findById("wnd[2]/tbar[0]/btn[13]").press()
+                session.findById("wnd[1]/tbar[0]/btn[13]").press()
+                session.findById("wnd[0]/tbar[0]/btn[11]").press()
+        session.EndTransaction()
+        session.findById("wnd[0]/tbar[0]/btn[15]").press()
+    except Exception as e:
+        if session.findById("wnd[0]/sbar").Text != "":
+            messagebox.showerror("SAP Tool", session.findById("wnd[0]/sbar").Text)
+        else:
+            messagebox.showerror("SAP Tool", "An error occurred processing this request.")
     pathlib.Path(filepath + "emailForTicket.msg").unlink()
 
 
 def trackTime():
-    pythoncom.CoInitialize()
-    session = openSAP()
-    if session is None:
-        return
-    session.startTransaction("CAT2")
-    session.findById("wnd[0]/tbar[1]/btn[7]").press()
-    session.findById("wnd[1]/usr/tabsTS_PROFILE/tabpPRGE/ssubPROFILE:SAPLCATS:3100/chkTCATS-TARGETROW").selected = True
-    session.findById("wnd[1]/usr/tabsTS_PROFILE/tabpPRGE/ssubPROFILE:SAPLCATS:3100/chkTCATS-SUMROW").selected = True
-    session.findById("wnd[1]/tbar[0]/btn[0]").press()
-    session.findById("wnd[0]/tbar[1]/btn[5]").press()
-    while session.findById("wnd[0]").Text != "Time Sheet: Data Entry View":
-        pass
-    win32gui.SetForegroundWindow(win32gui.FindWindow(None, 'Time Sheet: Data Entry View'))
+    try:
+        pythoncom.CoInitialize()
+        session = openSAP()
+        if session is None:
+            return
+        session.startTransaction("CAT2")
+        session.findById("wnd[0]/tbar[1]/btn[7]").press()
+        session.findById("wnd[1]/usr/tabsTS_PROFILE/tabpPRGE/ssubPROFILE:SAPLCATS:3100/chkTCATS-TARGETROW").selected = True
+        session.findById("wnd[1]/usr/tabsTS_PROFILE/tabpPRGE/ssubPROFILE:SAPLCATS:3100/chkTCATS-SUMROW").selected = True
+        session.findById("wnd[1]/tbar[0]/btn[0]").press()
+        session.findById("wnd[0]/tbar[1]/btn[5]").press()
+        while session.findById("wnd[0]").Text != "Time Sheet: Data Entry View":
+            pass
+        win32gui.SetForegroundWindow(win32gui.FindWindow(None, 'Time Sheet: Data Entry View'))
+    except Exception as e:
+        if session.findById("wnd[0]/sbar").Text != "":
+            messagebox.showerror("SAP Tool", session.findById("wnd[0]/sbar").Text)
+        else:
+            messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 
 def displayTicket():
-    ticketNum = simpledialog.askstring("SAP Shortcut Input", "Ticket Number:")
-    if ticketNum is None:
-        return
-    session = openSAP()
-    if session is None:
-        return
-    session.SendCommand("/n*IW53 RIWO00-QMNUM=" + ticketNum)
-    session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("CHRO", "Column01")
-    session.findById("wnd[0]/shellcont/shell").clickLink("CHRO", "Column01")
+    try:
+        ticketNum = simpledialog.askstring("SAP Shortcut Input", "Ticket Number:")
+        if ticketNum is None:
+            return
+        session = openSAP()
+        if session is None:
+            return
+        session.SendCommand("/n*IW53 RIWO00-QMNUM=" + ticketNum)
+        session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("CHRO", "Column01")
+        session.findById("wnd[0]/shellcont/shell").clickLink("CHRO", "Column01")
+    except Exception as e:
+        if session.findById("wnd[0]/sbar").Text != "":
+            messagebox.showerror("SAP Tool", session.findById("wnd[0]/sbar").Text)
+        else:
+            messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 def changeTicket():
-    ticketNum = simpledialog.askstring("SAP Shortcut Input", "Ticket Number:")
-    if ticketNum is None:
-        return
-    session = openSAP()
-    if session is None:
-        return
-    session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticketNum)
+    try:
+        ticketNum = simpledialog.askstring("SAP Shortcut Input", "Ticket Number:")
+        if ticketNum is None:
+            return
+        session = openSAP()
+        if session is None:
+            return
+        session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticketNum)
+    except Exception as e:
+        print("Test")
+        if session.findById("wnd[0]/sbar").Text != "":
+            messagebox.showerror("SAP Tool", session.findById("wnd[0]/sbar").Text)
+        else:
+            messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 
 def mm03():
-    modelNum = simpledialog.askstring("SAP Shortcut Input", "Model Number:")
-    if modelNum is None:
-        return
-    session = openSAP()
-    if session is None:
-        return
-    session.SendCommand("/n*MM03 RMMG1-MATNR=" + modelNum)
-    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").GetAbsoluteRow(0).Selected = True
-    session.findById("wnd[1]/tbar[0]/btn[0]").press()
+    try:
+        modelNum = simpledialog.askstring("SAP Shortcut Input", "Model Number:")
+        if modelNum is None:
+            return
+        session = openSAP()
+        if session is None:
+            return
+        session.SendCommand("/n*MM03 RMMG1-MATNR=" + modelNum)
+        session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").GetAbsoluteRow(0).Selected = True
+        session.findById("wnd[1]/tbar[0]/btn[0]").press()
+    except Exception as e:
+        if session.findById("wnd[0]/sbar").Text != "":
+            messagebox.showerror("SAP Tool", session.findById("wnd[0]/sbar").Text)
+        else:
+            messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 
 def addTicketSolution(ticket, solution, timeSpent):
-    session = openSAP()
-    if session is None:
-        return
-    session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-    session.findById("wnd[0]/shellcont/shell").clickLink("LOVO", "Column01")
-    session.findById("wnd[1]/usr/txtN_QMSM-MATXT").text = "Solution"
-    session.findById("wnd[1]/usr/cntlLOESUNG/shell").text = solution
-    session.findById("wnd[1]/tbar[0]/btn[13]").press()
-    session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
-    session.findById("wnd[1]/tbar[0]/btn[15]").press()
-    session.findById("wnd[0]/tbar[0]/btn[11]").press()
-    session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-    session.findById("wnd[0]/shellcont/shell").clickLink("ABGE", "Column01")
-    if session.Children.Count > 1:
-        session.findById("wnd[1]/usr/btnBUTTON_1").press()
-    session.findById("wnd[0]/tbar[0]/btn[11]").press()
+    try:
+        session = openSAP()
+        if session is None:
+            return
+        session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
+        session.findById("wnd[0]/shellcont/shell").clickLink("LOVO", "Column01")
+        session.findById("wnd[1]/usr/txtN_QMSM-MATXT").text = "Solution"
+        session.findById("wnd[1]/usr/cntlLOESUNG/shell").text = solution
+        session.findById("wnd[1]/tbar[0]/btn[13]").press()
+        session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
+        session.findById("wnd[1]/tbar[0]/btn[15]").press()
+        session.findById("wnd[0]/tbar[0]/btn[11]").press()
+        if session.Children.Count > 1:
+            session.findById("wnd[1]/usr/btnBUTTON_1").press()
+        session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
+        session.findById("wnd[0]/shellcont/shell").clickLink("ABGE", "Column01")
+        time.sleep(1)
+        if session.Children.Count > 1:
+            session.findById("wnd[1]/usr/btnBUTTON_1").press()
+        session.findById("wnd[0]/tbar[0]/btn[11]").press()
+    except Exception as e:
+        if session.findById("wnd[0]/sbar").Text != "":
+            messagebox.showerror("SAP Tool", session.findById("wnd[0]/sbar").Text)
+        else:
+            messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 
 def zsupl4():
-    session = openSAP()
-    if session is None:
-        return
-    session.StartTransaction("ZSUPL4")
-    session.findById("wnd[0]/usr/btn%_SO_INGRP_%_APP_%-VALU_PUSH").press()
-    session.findById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "465"
-    session.findById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "407"
-    session.findById("wnd[1]/tbar[0]/btn[8]").press()
-    session.findById("wnd[0]/tbar[1]/btn[8]").press()
+    try:
+        session = openSAP()
+        if session is None:
+            return
+        session.StartTransaction("ZSUPL4")
+        session.findById("wnd[0]/usr/btn%_SO_INGRP_%_APP_%-VALU_PUSH").press()
+        session.findById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,0]").text = "465"
+        session.findById("wnd[1]/usr/tabsTAB_STRIP/tabpSIVA/ssubSCREEN_HEADER:SAPLALDB:3010/tblSAPLALDBSINGLE/ctxtRSCSEL_255-SLOW_I[1,1]").text = "407"
+        session.findById("wnd[1]/tbar[0]/btn[8]").press()
+        session.findById("wnd[0]/tbar[1]/btn[8]").press()
+    except Exception as e:
+        if session.findById("wnd[0]/sbar").Text != "":
+            messagebox.showerror("SAP Tool", session.findById("wnd[0]/sbar").Text)
+        else:
+            messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 
 def openSAP():
