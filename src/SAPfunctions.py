@@ -120,17 +120,25 @@ def mm03():
     session.findById("wnd[1]/tbar[0]/btn[0]").press()
 
 
-def addTicketSolution(ticket, solution, timeSpent, close):
+def addTicketSolution(ticket, solution, timeSpent, close, addToBody):
     session = openSAP()
     if session is None:
         return
     session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
+    # session.findById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_2:SAPLIQS0:7715/cntlTEXT/shellcont/shell")
     session.findById("wnd[0]/shellcont/shell").clickLink("LOVO", "Column01")
     session.findById("wnd[1]/usr/txtN_QMSM-MATXT").text = "Solution"
     session.findById("wnd[1]/usr/cntlLOESUNG/shell").text = solution
     session.findById("wnd[1]/tbar[0]/btn[13]").press()
     session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
     session.findById("wnd[1]/tbar[0]/btn[15]").press()
+    if addToBody:
+        textField = "wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_2:SAPLIQS0:7715/cntlTEXT/shellcont/shell"
+        subjText = "********************* Solution ******************\n"
+        subjText += "This is a test solution\n"
+        subjText += "**************************************************\n"
+        for lineNum in range(session.findById(textField).LineCount + 1):
+            subjText += session.findById(textField).GetLineText(lineNum) + "\n"
     session.findById("wnd[0]/tbar[0]/btn[11]").press()
     if close:
         session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
@@ -182,5 +190,21 @@ def openSAP():
     return session
 
 
+def testBody(ticketnum):
+    session = openSAP()
+    if session is None:
+        return
+    session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticketnum)
+    textField = "wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_2:SAPLIQS0:7715/cntlTEXT/shellcont/shell"
+    for lineNum in range(session.findById(textField).LineCount + 1):
+        subjText += session.findById(textField).GetLineText(lineNum) + "\n"
+    subjText = "********************* Solution ******************\n"
+    subjText += "This is a test solution"
+    # messagebox.showinfo(message=subjText)
+    session.findById(textField).SetUnprotectedTextPart(len(subjText), subjText)
+    # session.findById(textField).SetSelectionIndexes(0, session.findById(textField).LineCount - 1)
+    # messagebox.showinfo("Shortcut", session.findById(textField).SelectedText)
+
+
 if __name__ == "__main__":
-    recordMail("L1 <> Customer", 5, False, 3)
+    testBody("400403922")
