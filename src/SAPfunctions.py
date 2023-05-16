@@ -134,11 +134,11 @@ def addTicketSolution(ticket, solution, timeSpent, close, addToBody):
     session.findById("wnd[1]/tbar[0]/btn[15]").press()
     if addToBody:
         textField = "wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_2:SAPLIQS0:7715/cntlTEXT/shellcont/shell"
-        subjText = "********************* Solution ******************\n"
-        subjText += "This is a test solution\n"
-        subjText += "**************************************************\n"
+        subjText = ""
         for lineNum in range(session.findById(textField).LineCount + 1):
             subjText += session.findById(textField).GetLineText(lineNum) + "\n"
+        subjText += "********************* Solution ******************\n"
+        subjText += "This is a test solution\n"
     session.findById("wnd[0]/tbar[0]/btn[11]").press()
     if close:
         session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
