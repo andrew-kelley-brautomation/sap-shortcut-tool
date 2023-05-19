@@ -5,6 +5,8 @@ from tkinter import messagebox, simpledialog
 import pythoncom
 import win32com.client
 import win32gui
+import os
+import parseConfig
 
 
 def newTicket():
@@ -26,7 +28,7 @@ def newTicket():
             messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 
-def recordMail(subject, timeSpent, attach, type, separate):
+def recordMail(subject, timeSpent, attach, type, internal, separate):
     outlookObj = win32com.client.Dispatch('Outlook.Application')
     try:
         outlookItem = outlookObj.ActiveInspector().CurrentItem
@@ -52,30 +54,53 @@ def recordMail(subject, timeSpent, attach, type, separate):
             return
         for ticket in tickets:
             session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-            session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
+            if internal:
+                session.findById("wnd[0]/shellcont/shell").clickLink("IDAT", "Column01")
+            else:
+                session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
             session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = subject
-            session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
+            if internal:
+                session.findById("wnd[1]/usr/cntlINTERN_DATA/shell").text = emailBody
+            else:
+                session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
             session.findById("wnd[1]/tbar[0]/btn[13]").press()
             session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
             if type != "00":
                 session.findById("wnd[1]/usr/cmbZCATS_TS_EVAL_NOTIFICATION-ZEVAL_TYPE").Key = type
             session.findById("wnd[1]/tbar[0]/btn[15]").press()
-            session.findById("wnd[0]/tbar[0]/btn[11]").press()
+            session.findById("wnd[0]/tbar[0]/btn[11]").press()            
             if session.Children.Count > 1:
                 session.findById("wnd[1]/usr/btnBUTTON_1").press()
             if attach:
                 session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
                 session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("ATAD", "Column01")
                 session.findById("wnd[0]/shellcont/shell").clickLink("ATAD", "Column01")
-                session.findById("wnd[1]/usr/chk[2,7]").selected = True
+                if internal:
+                    maxPosition = session.findById("wnd[1]/usr").VerticalScrollbar.Maximum
+                    position = 0
+                    foundComm = False
+                    while not foundComm:
+                        labels = session.findById("wnd[1]/usr").Children
+                        for label in labels:
+                            beginIndex = label.ID.index(",")
+                            row = label.ID[beginIndex + 1:len(label.ID) - 1]
+                            if label.text == "internal communication created":
+                                session.findById("wnd[1]/usr/chk[2," + row + "]").selected = True
+                                foundComm = True
+                                break
+                        if position > maxPosition:
+                            break
+                        session.findById("wnd[1]/usr").VerticalScrollbar.Position += session.findById(
+                            "wnd[1]/usr").VerticalScrollbar.PageSize
+                        position = session.findById("wnd[1]/usr").VerticalScrollbar.Position
+                else:
+                    session.findById("wnd[1]/usr/chk[2,7]").selected = True
                 session.findById("wnd[1]/tbar[0]/btn[18]").press()
                 session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
                 session.findById("wnd[3]/usr/txtDY_PATH").text = filepath
                 session.findById("wnd[3]/usr/txtDY_FILENAME").text = "emailForTicket.msg"
                 session.findById("wnd[3]/tbar[0]/btn[0]").press()
                 session.findById("wnd[2]/tbar[0]/btn[13]").press()
-                session.findById("wnd[1]/tbar[0]/btn[13]").press()
-                session.findById("wnd[0]/tbar[0]/btn[11]").press()
                 if session.Children.Count > 1:
                     session.findById("wnd[1]/usr/btnBUTTON_1").press()
             if separate:
@@ -187,28 +212,33 @@ def mm03():
             messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 
-def addTicketSolution(ticket, solution, timeSpent):
+def addTicketSolution(ticket, solution, timeSpent, close, addToBody):
     try:
-        session = openSAP()
-        if session is None:
-            return
-        session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-        session.findById("wnd[0]/shellcont/shell").clickLink("LOVO", "Column01")
-        session.findById("wnd[1]/usr/txtN_QMSM-MATXT").text = "Solution"
-        session.findById("wnd[1]/usr/cntlLOESUNG/shell").text = solution
-        session.findById("wnd[1]/tbar[0]/btn[13]").press()
-        session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
-        session.findById("wnd[1]/tbar[0]/btn[15]").press()
-        session.findById("wnd[0]/tbar[0]/btn[11]").press()
-        if session.Children.Count > 1:
-            session.findById("wnd[1]/usr/btnBUTTON_1").press()
-        if close:
-            session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-            session.findById("wnd[0]/shellcont/shell").clickLink("ABGE", "Column01")
-            time.sleep(1)
-            if session.Children.Count > 1:
-                session.findById("wnd[1]/usr/btnBUTTON_1").press()
-            session.findById("wnd[0]/tbar[0]/btn[11]").press()
+       session = openSAP()
+       if session is None:
+           return
+       session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
+       session.findById("wnd[0]/shellcont/shell").clickLink("LOVO", "Column01")
+       session.findById("wnd[1]/usr/txtN_QMSM-MATXT").text = "Solution"
+       session.findById("wnd[1]/usr/cntlLOESUNG/shell").text = solution
+       session.findById("wnd[1]/tbar[0]/btn[13]").press()
+       session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
+       session.findById("wnd[1]/tbar[0]/btn[15]").press()
+       if addToBody:
+           textField = "wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_2:SAPLIQS0:7715/cntlTEXT/shellcont/shell"
+           subjText = ""
+           for lineNum in range(session.findById(textField).LineCount + 1):
+               subjText += session.findById(textField).GetLineText(lineNum) + "\n"
+           subjText += "********************* Solution ******************\n"
+           subjText += solution
+       session.findById("wnd[0]/tbar[0]/btn[11]").press()
+       if close:
+           session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
+           session.findById("wnd[0]/shellcont/shell").clickLink("ABGE", "Column01")
+           time.sleep(1)
+           if session.Children.Count > 1:
+               session.findById("wnd[1]/usr/btnBUTTON_1").press()
+           session.findById("wnd[0]/tbar[0]/btn[11]").press()
     except Exception as e:
         if session.findById("wnd[0]/sbar").Text != "":
             messagebox.showerror("SAP Tool", session.findById("wnd[0]/sbar").Text)
@@ -237,31 +267,50 @@ def zsupl4():
 def openSAP():
     pythoncom.CoInitialize()
     try:
+
         SapGuiAuto = win32com.client.GetObject("SAPGUI")
     except Exception as e:
-        print(str(e))
-        messagebox.showerror('SAP Shortcut Error', 'Please log in to SAP')
-        return None
+        # print(str(e))
+        # messagebox.showerror('SAP Shortcut Error', 'Please log in to SAP')
+        # return None
+        if parseConfig.parseConfig()['LOGIN'].getboolean('AUTO_LOGIN', True):
+            parseConfig.makeBatch()
+            count = 0
+            while win32gui.FindWindow(None, 'License Information For Multiple Logons') == 0 and \
+                    win32gui.FindWindow(None, 'SAP Easy Access') == 0:
+                pass
+            SapGuiAuto = win32com.client.GetObject("SAPGUI")
+        else:
+            messagebox.showerror('SAP Shortcut Error', 'Please log in to SAP')
+            return None
     if not type(SapGuiAuto) == win32com.client.CDispatch:
+        messagebox.showerror('SAP Shortcut Error', 'Something went wrong')
         return None
     application = SapGuiAuto.GetScriptingEngine
     if not type(application) == win32com.client.CDispatch:
+        messagebox.showerror('SAP Shortcut Error', 'Something went wrong')
         return None
     connection = application.Children(0)
     if not type(connection) == win32com.client.CDispatch:
+        messagebox.showerror('SAP Shortcut Error', 'Something went wrong')
         return None
     numSessions = connection.Children.Count
     session = connection.Children(0)
     if not type(session) == win32com.client.CDispatch:
+        messagebox.showerror('SAP Shortcut Error', 'Something went wrong')
         return None
     if connection.Children.Count > 5:
         messagebox.showerror('SAP Shortcut Error', 'Too many sessions open.\nPlease close an unneeded window')
         return None
-    session.CreateSession()
-    while not (connection.Children.Count > numSessions):
-        pass
+    if win32gui.FindWindow(None, 'License Information For Multiple Logons') != 0:
+        session.findById('wnd[1]/usr/radMULTI_LOGON_OPT2').select()
+        session.findById('wnd[1]/tbar[0]/btn[0]').press()
+    else:
+        session.CreateSession()
+        while not (connection.Children.Count > numSessions):
+            pass
     session = connection.Children(connection.Children.Count - 1)
     return session
 
 if __name__ == "__main__":
-    test()
+    return
