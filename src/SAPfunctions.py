@@ -117,7 +117,26 @@ def recordMail(subject, timeSpent, attach, type, internal, separate):
                 session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
                 session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("ATAD", "Column01")
                 session.findById("wnd[0]/shellcont/shell").clickLink("ATAD", "Column01")
-                session.findById("wnd[1]/usr/chk[2,7]").selected = True
+                if internal:
+                    maxPosition = session.findById("wnd[1]/usr").VerticalScrollbar.Maximum
+                    position = 0
+                    foundComm = False
+                    while not foundComm:
+                        labels = session.findById("wnd[1]/usr").Children
+                        for label in labels:
+                            beginIndex = label.ID.index(",")
+                            row = label.ID[beginIndex + 1:len(label.ID) - 1]
+                            if label.text == "internal communication created":
+                                session.findById("wnd[1]/usr/chk[2," + row + "]").selected = True
+                                foundComm = True
+                                break
+                        if position > maxPosition:
+                            break
+                        session.findById("wnd[1]/usr").VerticalScrollbar.Position += session.findById(
+                            "wnd[1]/usr").VerticalScrollbar.PageSize
+                        position = session.findById("wnd[1]/usr").VerticalScrollbar.Position
+                else:
+                    session.findById("wnd[1]/usr/chk[2,7]").selected = True
                 session.findById("wnd[1]/tbar[0]/btn[18]").press()
                 session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
                 session.findById("wnd[3]/usr/txtDY_PATH").text = filepath
@@ -313,4 +332,4 @@ def openSAP():
     return session
 
 if __name__ == "__main__":
-    return
+    openSAP()
