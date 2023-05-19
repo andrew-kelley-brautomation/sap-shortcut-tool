@@ -145,6 +145,8 @@ def recordMail(subject, timeSpent, attach, type, internal, separate):
                 session.findById("wnd[2]/tbar[0]/btn[13]").press()
                 session.findById("wnd[1]/tbar[0]/btn[13]").press()
                 session.findById("wnd[0]/tbar[0]/btn[11]").press()
+                if session.Children.Count > 1:
+                    session.findById("wnd[1]/usr/btnBUTTON_1").press()
                 for file in files:
                     pathlib.Path(filepath + file).unlink()
         session.EndTransaction()
@@ -251,6 +253,8 @@ def addTicketSolution(ticket, solution, timeSpent, close, addToBody):
            subjText += "********************* Solution ******************\n"
            subjText += solution
        session.findById("wnd[0]/tbar[0]/btn[11]").press()
+       if session.Children.Count > 1:
+           session.findById("wnd[1]/usr/btnBUTTON_1").press()
        if close:
            session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
            session.findById("wnd[0]/shellcont/shell").clickLink("ABGE", "Column01")
