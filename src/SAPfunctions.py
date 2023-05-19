@@ -28,7 +28,7 @@ def newTicket():
             messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 
-def recordMail(subject, timeSpent, attach, type):
+def recordMail(subject, timeSpent, attach, type, internal):
     outlookObj = win32com.client.Dispatch('Outlook.Application')
     try:
         outlookItem = outlookObj.ActiveInspector().CurrentItem
@@ -54,30 +54,53 @@ def recordMail(subject, timeSpent, attach, type):
             return
         for ticket in tickets:
             session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-            session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
+            if internal:
+                session.findById("wnd[0]/shellcont/shell").clickLink("IDAT", "Column01")
+            else:
+                session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
             session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = subject
-            session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
+            if internal:
+                session.findById("wnd[1]/usr/cntlINTERN_DATA/shell").text = emailBody
+            else:
+                session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
             session.findById("wnd[1]/tbar[0]/btn[13]").press()
             session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
             if type != "00":
                 session.findById("wnd[1]/usr/cmbZCATS_TS_EVAL_NOTIFICATION-ZEVAL_TYPE").Key = type
             session.findById("wnd[1]/tbar[0]/btn[15]").press()
-            session.findById("wnd[0]/tbar[0]/btn[11]").press()
+            session.findById("wnd[0]/tbar[0]/btn[11]").press()            
             if session.Children.Count > 1:
                 session.findById("wnd[1]/usr/btnBUTTON_1").press()
             if attach:
                 session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
                 session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("ATAD", "Column01")
                 session.findById("wnd[0]/shellcont/shell").clickLink("ATAD", "Column01")
-                session.findById("wnd[1]/usr/chk[2,7]").selected = True
+                if internal:
+                    maxPosition = session.findById("wnd[1]/usr").VerticalScrollbar.Maximum
+                    position = 0
+                    foundComm = False
+                    while not foundComm:
+                        labels = session.findById("wnd[1]/usr").Children
+                        for label in labels:
+                            beginIndex = label.ID.index(",")
+                            row = label.ID[beginIndex + 1:len(label.ID) - 1]
+                            if label.text == "internal communication created":
+                                session.findById("wnd[1]/usr/chk[2," + row + "]").selected = True
+                                foundComm = True
+                                break
+                        if position > maxPosition:
+                            break
+                        session.findById("wnd[1]/usr").VerticalScrollbar.Position += session.findById(
+                            "wnd[1]/usr").VerticalScrollbar.PageSize
+                        position = session.findById("wnd[1]/usr").VerticalScrollbar.Position
+                else:
+                    session.findById("wnd[1]/usr/chk[2,7]").selected = True
                 session.findById("wnd[1]/tbar[0]/btn[18]").press()
                 session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
                 session.findById("wnd[3]/usr/txtDY_PATH").text = filepath
                 session.findById("wnd[3]/usr/txtDY_FILENAME").text = "emailForTicket.msg"
                 session.findById("wnd[3]/tbar[0]/btn[0]").press()
                 session.findById("wnd[2]/tbar[0]/btn[13]").press()
-                session.findById("wnd[1]/tbar[0]/btn[13]").press()
-                session.findById("wnd[0]/tbar[0]/btn[11]").press()
                 if session.Children.Count > 1:
                     session.findById("wnd[1]/usr/btnBUTTON_1").press()
         session.EndTransaction()
@@ -265,4 +288,4 @@ def openSAP():
     return session
 
 if __name__ == "__main__":
-    testBody("400403922")
+    return
