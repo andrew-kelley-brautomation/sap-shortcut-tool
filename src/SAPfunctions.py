@@ -19,7 +19,7 @@ def newTicket():
     # print("Messagebox passed")
 
 
-def recordMail(subject, timeSpent, attach, type):
+def recordMail(subject, timeSpent, attach, type, internal):
     outlookObj = win32com.client.Dispatch('Outlook.Application')
     try:
         outlookItem = outlookObj.ActiveInspector().CurrentItem
@@ -44,9 +44,15 @@ def recordMail(subject, timeSpent, attach, type):
         return
     for ticket in tickets:
         session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-        session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
+        if internal:
+            session.findById("wnd[0]/shellcont/shell").clickLink("IDAT", "Column01")
+        else:
+            session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
         session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = subject
-        session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
+        if internal:
+            session.findById("wnd[1]/usr/cntlINTERN_DATA/shell").text = emailBody
+        else:
+            session.findById("wnd[1]/usr/cntlMAIL/shell").text = emailBody
         session.findById("wnd[1]/tbar[0]/btn[13]").press()
         session.findById("wnd[1]/usr/tblSAPLZCATS_UITC_CATS_TD/txtGS_ZSUPPORT_INPUT-ZSUP_MINUTES[3,0]").text = timeSpent
         if type != "00":
@@ -57,7 +63,26 @@ def recordMail(subject, timeSpent, attach, type):
             session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
             session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("ATAD", "Column01")
             session.findById("wnd[0]/shellcont/shell").clickLink("ATAD", "Column01")
-            session.findById("wnd[1]/usr/chk[2,7]").selected = True
+            if internal:
+                maxPosition = session.findById("wnd[1]/usr").VerticalScrollbar.Maximum
+                position = 0
+                foundComm = False
+                while not foundComm:
+                    labels = session.findById("wnd[1]/usr").Children
+                    for label in labels:
+                        beginIndex = label.ID.index(",")
+                        row = label.ID[beginIndex + 1:len(label.ID) - 1]
+                        if label.text == "internal communication created":
+                            session.findById("wnd[1]/usr/chk[2," + row + "]").selected = True
+                            foundComm = True
+                            break
+                    if position > maxPosition:
+                        break
+                    session.findById("wnd[1]/usr").VerticalScrollbar.Position += session.findById(
+                        "wnd[1]/usr").VerticalScrollbar.PageSize
+                    position = session.findById("wnd[1]/usr").VerticalScrollbar.Position
+            else:
+                session.findById("wnd[1]/usr/chk[2,7]").selected = True
             session.findById("wnd[1]/tbar[0]/btn[18]").press()
             session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
             session.findById("wnd[3]/usr/txtDY_PATH").text = filepath
@@ -195,16 +220,39 @@ def testBody(ticketnum):
     if session is None:
         return
     session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticketnum)
-    textField = "wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_2:SAPLIQS0:7715/cntlTEXT/shellcont/shell"
-    for lineNum in range(session.findById(textField).LineCount + 1):
-        subjText += session.findById(textField).GetLineText(lineNum) + "\n"
-    subjText = "********************* Solution ******************\n"
-    subjText += "This is a test solution"
-    # messagebox.showinfo(message=subjText)
-    session.findById(textField).SetUnprotectedTextPart(len(subjText), subjText)
-    # session.findById(textField).SetSelectionIndexes(0, session.findById(textField).LineCount - 1)
-    # messagebox.showinfo("Shortcut", session.findById(textField).SelectedText)
+    session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("ATAD", "Column01")
+    session.findById("wnd[0]/shellcont/shell").clickLink("ATAD", "Column01")
+    maxPosition = session.findById("wnd[1]/usr").VerticalScrollbar.Maximum
+    position = 0
+    foundComm = False
+    while not foundComm:
+        labels = session.findById("wnd[1]/usr").Children
+        for label in labels:
+            beginIndex = label.ID.index(",")
+            row = label.ID[beginIndex + 1:len(label.ID) - 1]
+            if label.text == "internal communication created":
+                session.findById("wnd[1]/usr/chk[2," + row + "]").selected = True
+                foundComm = True
+                break
+        if position > maxPosition:
+            break
+        session.findById("wnd[1]/usr").VerticalScrollbar.Position += session.findById("wnd[1]/usr").VerticalScrollbar.PageSize
+        position = session.findById("wnd[1]/usr").VerticalScrollbar.Position
+
+
+def recordLotsOfMail():
+    session = openSAP()
+    if session is None:
+        return
+    for x in range(10):
+        session.SendCommand("/n*IW52 RIWO00-QMNUM=" + "400403922")
+        session.findById("wnd[0]/shellcont/shell").clickLink("MAIL", "Column01")
+        session.findById("wnd[1]/usr/txtN_QMMA-MATXT").text = "test"
+        session.findById("wnd[1]/tbar[0]/btn[13]").press()
+        session.findById("wnd[1]/tbar[0]/btn[15]").press()
+        session.findById("wnd[0]/tbar[0]/btn[11]").press()
 
 
 if __name__ == "__main__":
     testBody("400403922")
+    # recordLotsOfMail()
