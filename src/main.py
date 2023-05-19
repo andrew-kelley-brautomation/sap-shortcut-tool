@@ -49,6 +49,7 @@ def mail_button_on_click():
     }
     child = Toplevel(root)
     attach = IntVar()
+    separate = IntVar()
     internal = IntVar()
     subjLabel = Label(child, font=scaledFont)
     subj = Entry(child, font=scaledFont)
@@ -63,19 +64,21 @@ def mail_button_on_click():
     internalBox.deselect()
     if mailSettings.getboolean('DEFAULT_ATTACH'):
         attachBox.select()
+    separateBox = Checkbutton(child, text="Attach email attachments individually", variable=separate, font=scaledFont)
     subjLabel.grid(column=2, row=2)
     subj.grid(column=2, row=3)
     timeLabel.grid(column=2, row=4)
     timeAmount.grid(column=2, row=5)
     attachBox.grid(column=2, row=6)
-    internalBox.grid(column=2, row=7)
+    separateBox.grid(column=2, row=7)
+    internalBox.grid(column=2, row=8)
     selectedType = StringVar()
     typeSelector = Combobox(child, textvariable=selectedType, width=40)
     print(list(sapTypes.keys()))
     typeSelector['values'] = list(sapTypes.keys())
     typeSelector['state'] = 'readonly'
     typeSelector.current(0)
-    typeSelector.grid(column=2, row=8)
+    typeSelector.grid(column=2, row=9)
     errorLabel = Label(child, fg="red")
 
     def validate_subject(subject):
@@ -100,7 +103,7 @@ def mail_button_on_click():
             if len(subjectText) <= 40:
                 child.destroy()
                 recordMail(subjectText, timeSpent, True if attach.get() == 1 else False,
-                           sapTypes.get(selectedType.get()), True if internal.get() == 1 else False)
+                           sapTypes.get(selectedType.get()), True if internal.get() == 1 else False, True if separate.get() == 1 else False)
             else:
                 errorLabel.config(text=f"Subject must be less than 40 characters (Currently: {len(subjectText)})")
                 errorLabel.grid(column=2, row=1)
@@ -110,7 +113,7 @@ def mail_button_on_click():
 
     child.bind("<Return>", cont)
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=cont, font=scaledFont)
-    contButton.grid(column=2, row=9)
+    contButton.grid(column=2, row=10)
 
 
 def time_tracking_on_click():
