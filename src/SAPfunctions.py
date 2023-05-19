@@ -5,6 +5,8 @@ from tkinter import messagebox, simpledialog
 import pythoncom
 import win32com.client
 import win32gui
+import os
+import parseConfig
 
 
 def newTicket():
@@ -212,29 +214,48 @@ def zsupl4():
 def openSAP():
     pythoncom.CoInitialize()
     try:
+
         SapGuiAuto = win32com.client.GetObject("SAPGUI")
     except Exception as e:
-        print(str(e))
-        messagebox.showerror('SAP Shortcut Error', 'Please log in to SAP')
-        return None
+        # print(str(e))
+        # messagebox.showerror('SAP Shortcut Error', 'Please log in to SAP')
+        # return None
+        if parseConfig.parseConfig()['LOGIN'].getboolean('AUTO_LOGIN', True):
+            parseConfig.makeBatch()
+            count = 0
+            while win32gui.FindWindow(None, 'License Information For Multiple Logons') == 0 and \
+                    win32gui.FindWindow(None, 'SAP Easy Access') == 0:
+                pass
+            SapGuiAuto = win32com.client.GetObject("SAPGUI")
+        else:
+            messagebox.showerror('SAP Shortcut Error', 'Please log in to SAP')
+            return None
     if not type(SapGuiAuto) == win32com.client.CDispatch:
+        messagebox.showerror('SAP Shortcut Error', 'Something went wrong')
         return None
     application = SapGuiAuto.GetScriptingEngine
     if not type(application) == win32com.client.CDispatch:
+        messagebox.showerror('SAP Shortcut Error', 'Something went wrong')
         return None
     connection = application.Children(0)
     if not type(connection) == win32com.client.CDispatch:
+        messagebox.showerror('SAP Shortcut Error', 'Something went wrong')
         return None
     numSessions = connection.Children.Count
     session = connection.Children(0)
     if not type(session) == win32com.client.CDispatch:
+        messagebox.showerror('SAP Shortcut Error', 'Something went wrong')
         return None
     if connection.Children.Count > 5:
         messagebox.showerror('SAP Shortcut Error', 'Too many sessions open.\nPlease close an unneeded window')
         return None
-    session.CreateSession()
-    while not (connection.Children.Count > numSessions):
-        pass
+    if win32gui.FindWindow(None, 'License Information For Multiple Logons') != 0:
+        session.findById('wnd[1]/usr/radMULTI_LOGON_OPT2').select()
+        session.findById('wnd[1]/tbar[0]/btn[0]').press()
+    else:
+        session.CreateSession()
+        while not (connection.Children.Count > numSessions):
+            pass
     session = connection.Children(connection.Children.Count - 1)
     return session
 

@@ -1,4 +1,5 @@
-from tkinter import messagebox
+import subprocess
+from tkinter import messagebox, simpledialog
 import configparser
 import os
 
@@ -16,6 +17,9 @@ configSettings = {
         "DEFAULT_TIME": "5",
         "DEFAULT_CLOSE": "True",
     },
+    "LOGIN": {
+        "AUTO_LOGIN": "True",
+    }
 }
 
 def parseConfig():
@@ -38,6 +42,19 @@ def parseConfig():
     configFile.close()
     return parser
 
+def makeBatch():
+    try:
+        batchFile = open("C:/SAP Shortcut Tool/openSAP.bat", 'r')
+    except FileNotFoundError:
+        messagebox.showinfo("SAP Tool", "Unable to find batch file, creating file.")
+        os.makedirs("C:/SAP Shortcut Tool/", exist_ok=True)
+        username = simpledialog.askstring("SAP Tool", "SAP Username:")
+        password = simpledialog.askstring("SAP Tool", "SAP Password:")
+        batchFile = open("C:/SAP Shortcut Tool/openSAP.bat", 'w')
+        batchFile.write('start C:/"Program Files (x86)"/SAP/FrontEnd/SAPgui/sapshcut -sysname="B&R Production System" '
+                        '-client=444 -user=' + username + ' -pw=' + password)
+    batchFile.close()
+    subprocess.Popen('C:/SAP Shortcut Tool/openSAP.bat')
 
 if __name__ == "__main__":
     parseConfig()
