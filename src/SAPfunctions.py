@@ -26,7 +26,7 @@ def newTicket():
             messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 
-def recordMail(subject, timeSpent, attach, type):
+def recordMail(subject, timeSpent, attach, type, separate):
     outlookObj = win32com.client.Dispatch('Outlook.Application')
     try:
         outlookItem = outlookObj.ActiveInspector().CurrentItem
@@ -78,6 +78,31 @@ def recordMail(subject, timeSpent, attach, type):
                 session.findById("wnd[0]/tbar[0]/btn[11]").press()
                 if session.Children.Count > 1:
                     session.findById("wnd[1]/usr/btnBUTTON_1").press()
+            if separate:
+                numAttachments = outlookItem.Attachments.Count
+                filenames = '"'
+                files = []
+                for num in range(1, numAttachments + 1):
+                    attachment = outlookItem.Attachments.Item(num)
+                    image = re.findall('image\d{3}', attachment.DisplayName)
+                    if len(image) == 0:
+                        files.append(attachment.DisplayName)
+                        filenames += attachment.DisplayName + '" "'
+                        attachment.SaveAsFile(filepath + attachment.DisplayName)
+                session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
+                session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("ATAD", "Column01")
+                session.findById("wnd[0]/shellcont/shell").clickLink("ATAD", "Column01")
+                session.findById("wnd[1]/usr/chk[2,7]").selected = True
+                session.findById("wnd[1]/tbar[0]/btn[18]").press()
+                session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
+                session.findById("wnd[3]/usr/txtDY_PATH").text = filepath
+                session.findById("wnd[3]/usr/txtDY_FILENAME").text = filenames[:-2]
+                session.findById("wnd[3]/tbar[0]/btn[0]").press()
+                session.findById("wnd[2]/tbar[0]/btn[13]").press()
+                session.findById("wnd[1]/tbar[0]/btn[13]").press()
+                session.findById("wnd[0]/tbar[0]/btn[11]").press()
+                for file in files:
+                    pathlib.Path(filepath + file).unlink()
         session.EndTransaction()
         session.findById("wnd[0]/tbar[0]/btn[15]").press()
     except Exception as e:
@@ -238,6 +263,5 @@ def openSAP():
     session = connection.Children(connection.Children.Count - 1)
     return session
 
-
 if __name__ == "__main__":
-    recordMail("L1 <> Customer", 5, False, 3)
+    test()
