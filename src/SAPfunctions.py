@@ -138,7 +138,7 @@ def addTicketSolution(ticket, solution, timeSpent, close, addToBody):
         for lineNum in range(session.findById(textField).LineCount + 1):
             subjText += session.findById(textField).GetLineText(lineNum) + "\n"
         subjText += "********************* Solution ******************\n"
-        subjText += "This is a test solution\n"
+        subjText += solution
     session.findById("wnd[0]/tbar[0]/btn[11]").press()
     if close:
         session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
@@ -188,23 +188,6 @@ def openSAP():
         pass
     session = connection.Children(connection.Children.Count - 1)
     return session
-
-
-def testBody(ticketnum):
-    session = openSAP()
-    if session is None:
-        return
-    session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticketnum)
-    textField = "wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_2:SAPLIQS0:7715/cntlTEXT/shellcont/shell"
-    for lineNum in range(session.findById(textField).LineCount + 1):
-        subjText += session.findById(textField).GetLineText(lineNum) + "\n"
-    subjText = "********************* Solution ******************\n"
-    subjText += "This is a test solution"
-    # messagebox.showinfo(message=subjText)
-    session.findById(textField).SetUnprotectedTextPart(len(subjText), subjText)
-    # session.findById(textField).SetSelectionIndexes(0, session.findById(textField).LineCount - 1)
-    # messagebox.showinfo("Shortcut", session.findById(textField).SelectedText)
-
 
 if __name__ == "__main__":
     testBody("400403922")
