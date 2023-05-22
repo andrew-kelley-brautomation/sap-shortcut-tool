@@ -101,6 +101,8 @@ def recordMail(subject, timeSpent, attach, type, internal, separate):
                 session.findById("wnd[3]/usr/txtDY_FILENAME").text = "emailForTicket.msg"
                 session.findById("wnd[3]/tbar[0]/btn[0]").press()
                 session.findById("wnd[2]/tbar[0]/btn[13]").press()
+                session.findById("wnd[2]/tbar[0]/btn[13]").press()
+                session.findById("wnd[0]/tbar[0]/btn[11]").press()
                 if session.Children.Count > 1:
                     session.findById("wnd[1]/usr/btnBUTTON_1").press()
             if separate:
