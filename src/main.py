@@ -146,7 +146,7 @@ def solution_button_on_click():
     close = IntVar()
     closeBox = Checkbutton(child, text="Close Ticket", variable=close, font=scaledFont)
     addToBody = IntVar()
-    addToBodyBox = Checkbutton(child, text="Add to Ticket Body", variable=close, font=scaledFont)
+    addToBodyBox = Checkbutton(child, text="Add to Ticket Body", variable=addToBody, font=scaledFont)
     if solutionSettings.getboolean('DEFAULT_CLOSE'):
         closeBox.select()
     timeAmount.insert(0, solutionSettings.getint('DEFAULT_TIME', 5))
