@@ -1,19 +1,49 @@
 import keyboard
-from SAPfunctions import *
+from main import *
 
 
-def function1():
-    newTicket()
+def new_ticket():
+    open_button_on_click()
 
 
-# Define your hotkey combination
+def record_mail():
+    mail_button_on_click()
+
+
+def time_tracking():
+    time_tracking_on_click()
+
+
+def display():
+    display_button_on_click()
+
+
+def change():
+    change_button_on_click()
+
+
+def mm03():
+    mm03_button_on_click()
+
+
+def zsupl4():
+    zsupl4_button_on_click()
+
+
+def solution():
+    solution_button_on_click()
+
+
 if __name__ == "__main__":
-    hotkey = "ctrl+alt+p"
-
-    # Add the hotkey event listener
-    keyboard.add_hotkey(hotkey, function1)
-
-    # Start the event listener loop
+    hotkeySettings = parseConfig.parseConfig()['HOTKEYS']
+    keyboard.add_hotkey(hotkeySettings.get("NEW_TICKET", "ctrl+shift+q"), new_ticket)
+    keyboard.add_hotkey(hotkeySettings.get("RECORD_MAIL", "ctrl+shift+w"), record_mail)
+    keyboard.add_hotkey(hotkeySettings.get("TRACK_TIME", "ctrl+shift+e"), time_tracking)
+    keyboard.add_hotkey(hotkeySettings.get("DISPLAY", "ctrl+shift+a"), display)
+    keyboard.add_hotkey(hotkeySettings.get("CHANGE", "ctrl+shift+s"), change)
+    keyboard.add_hotkey(hotkeySettings.get("MM03", "ctrl+shift+d"), mm03)
+    keyboard.add_hotkey(hotkeySettings.get("SOLUTION", "ctrl+shift+z"), solution)
+    keyboard.add_hotkey(hotkeySettings.get("TICKET_LIST", "ctrl+shift+x"), zsupl4)
     keyboard.wait()
 
 
