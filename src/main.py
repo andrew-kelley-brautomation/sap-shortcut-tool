@@ -74,12 +74,16 @@ def mail_button_on_click():
     internalBox.grid(column=2, row=8)
     selectedType = StringVar()
     typeSelector = Combobox(child, textvariable=selectedType, width=40)
-    print(list(sapTypes.keys()))
+    # print(list(sapTypes.keys()))
     typeSelector['values'] = list(sapTypes.keys())
     typeSelector['state'] = 'readonly'
     typeSelector.current(0)
     typeSelector.grid(column=2, row=9)
     errorLabel = Label(child, fg="red")
+    emailBodyLabel = Label(child, text="Solution:", font=scaledFont)
+    emailBody = Text(child, width=60, height=10, font=scaledFont)
+    emailBodyLabel.grid(column=2, row=10)
+    emailBody.grid(column=2, row=11)
 
     def validate_subject(subject):
         subjLabel.config(text=f"Subject: ({len(subject)}/40)")
@@ -100,10 +104,12 @@ def mail_button_on_click():
         try:
             timeSpent = int(timeAmount.get())
             subjectText = subj.get()
+            emailBodyText = emailBody.get("1.0", END)
             if len(subjectText) <= 40:
                 child.destroy()
                 recordMail(subjectText, timeSpent, True if attach.get() == 1 else False,
-                           sapTypes.get(selectedType.get()), True if internal.get() == 1 else False, True if separate.get() == 1 else False)
+                           sapTypes.get(selectedType.get()), True if internal.get() == 1 else False,
+                           True if separate.get() == 1 else False, emailBodyText)
             else:
                 errorLabel.config(text=f"Subject must be less than 40 characters (Currently: {len(subjectText)})")
                 errorLabel.grid(column=2, row=1)
@@ -111,9 +117,9 @@ def mail_button_on_click():
             errorLabel.config(text="Please enter an integer time quantity")
             errorLabel.grid(column=2, row=1)
 
-    child.bind("<Return>", cont)
+    # child.bind("<Return>", cont)
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=cont, font=scaledFont)
-    contButton.grid(column=2, row=10)
+    contButton.grid(column=2, row=12)
 
 
 def time_tracking_on_click():

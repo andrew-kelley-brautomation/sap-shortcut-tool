@@ -28,7 +28,7 @@ def newTicket():
             messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 
-def recordMail(subject, timeSpent, attach, type, internal, separate):
+def recordMail(subject, timeSpent, attach, type, internal, separate, emailBodyText):
     outlookObj = win32com.client.Dispatch('Outlook.Application')
     try:
         outlookItem = outlookObj.ActiveInspector().CurrentItem
@@ -41,7 +41,10 @@ def recordMail(subject, timeSpent, attach, type, internal, separate):
         messagebox.showerror("SAP Shortcut Error", "Current Outlook Item Not An Email")
         return
     tickets = re.findall('400\d{6}', outlookItem.Subject)
-    emailBody = outlookItem.Body
+    if len(emailBodyText) <= 1:
+        emailBody = outlookItem.Body
+    else:
+        emailBody = emailBodyText
     if len(tickets) < 1:
         messagebox.showerror("SAP Shortcut Error", "No ticket in subject line")
         return
