@@ -68,7 +68,7 @@ def recordMail(subject, timeSpent, attach, type, internal, separate):
             if type != "00":
                 session.findById("wnd[1]/usr/cmbZCATS_TS_EVAL_NOTIFICATION-ZEVAL_TYPE").Key = type
             session.findById("wnd[1]/tbar[0]/btn[15]").press()
-            session.findById("wnd[0]/tbar[0]/btn[11]").press()            
+            session.findById("wnd[0]/tbar[0]/btn[11]").press()
             if session.Children.Count > 1:
                 session.findById("wnd[1]/usr/btnBUTTON_1").press()
             if attach:
@@ -116,41 +116,42 @@ def recordMail(subject, timeSpent, attach, type, internal, separate):
                         files.append(attachment.DisplayName)
                         filenames += attachment.DisplayName + '" "'
                         attachment.SaveAsFile(filepath + attachment.DisplayName)
-                session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
-                session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("ATAD", "Column01")
-                session.findById("wnd[0]/shellcont/shell").clickLink("ATAD", "Column01")
-                if internal:
-                    maxPosition = session.findById("wnd[1]/usr").VerticalScrollbar.Maximum
-                    position = 0
-                    foundComm = False
-                    while not foundComm:
-                        labels = session.findById("wnd[1]/usr").Children
-                        for label in labels:
-                            beginIndex = label.ID.index(",")
-                            row = label.ID[beginIndex + 1:len(label.ID) - 1]
-                            if label.text == "internal communication created":
-                                session.findById("wnd[1]/usr/chk[2," + row + "]").selected = True
-                                foundComm = True
+                if len(files) > 0:
+                    session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
+                    session.findById("wnd[0]/shellcont/shell").ensureVisibleHorizontalItem("ATAD", "Column01")
+                    session.findById("wnd[0]/shellcont/shell").clickLink("ATAD", "Column01")
+                    if internal:
+                        maxPosition = session.findById("wnd[1]/usr").VerticalScrollbar.Maximum
+                        position = 0
+                        foundComm = False
+                        while not foundComm:
+                            labels = session.findById("wnd[1]/usr").Children
+                            for label in labels:
+                                beginIndex = label.ID.index(",")
+                                row = label.ID[beginIndex + 1:len(label.ID) - 1]
+                                if label.text == "internal communication created":
+                                    session.findById("wnd[1]/usr/chk[2," + row + "]").selected = True
+                                    foundComm = True
+                                    break
+                            if position > maxPosition:
                                 break
-                        if position > maxPosition:
-                            break
-                        session.findById("wnd[1]/usr").VerticalScrollbar.Position += session.findById(
-                            "wnd[1]/usr").VerticalScrollbar.PageSize
-                        position = session.findById("wnd[1]/usr").VerticalScrollbar.Position
-                else:
-                    session.findById("wnd[1]/usr/chk[2,7]").selected = True
-                session.findById("wnd[1]/tbar[0]/btn[18]").press()
-                session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
-                session.findById("wnd[3]/usr/txtDY_PATH").text = filepath
-                session.findById("wnd[3]/usr/txtDY_FILENAME").text = filenames[:-2]
-                session.findById("wnd[3]/tbar[0]/btn[0]").press()
-                session.findById("wnd[2]/tbar[0]/btn[13]").press()
-                session.findById("wnd[1]/tbar[0]/btn[13]").press()
-                session.findById("wnd[0]/tbar[0]/btn[11]").press()
-                if session.Children.Count > 1:
-                    session.findById("wnd[1]/usr/btnBUTTON_1").press()
-                for file in files:
-                    pathlib.Path(filepath + file).unlink()
+                            session.findById("wnd[1]/usr").VerticalScrollbar.Position += session.findById(
+                                "wnd[1]/usr").VerticalScrollbar.PageSize
+                            position = session.findById("wnd[1]/usr").VerticalScrollbar.Position
+                    else:
+                        session.findById("wnd[1]/usr/chk[2,7]").selected = True
+                    session.findById("wnd[1]/tbar[0]/btn[18]").press()
+                    session.findById("wnd[2]/usr/btnATTACH_INSERT").press()
+                    session.findById("wnd[3]/usr/txtDY_PATH").text = filepath
+                    session.findById("wnd[3]/usr/txtDY_FILENAME").text = filenames[:-2]
+                    session.findById("wnd[3]/tbar[0]/btn[0]").press()
+                    session.findById("wnd[2]/tbar[0]/btn[13]").press()
+                    session.findById("wnd[1]/tbar[0]/btn[13]").press()
+                    session.findById("wnd[0]/tbar[0]/btn[11]").press()
+                    if session.Children.Count > 1:
+                        session.findById("wnd[1]/usr/btnBUTTON_1").press()
+                    for file in files:
+                        pathlib.Path(filepath + file).unlink()
         session.EndTransaction()
         session.findById("wnd[0]/tbar[0]/btn[15]").press()
     except Exception as e:
