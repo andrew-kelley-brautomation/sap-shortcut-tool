@@ -1,24 +1,11 @@
-import configparser
 import subprocess
+import sys
 from tkinter import *
 from tkinter import font
 from tkinter.ttk import Combobox
 from SAPfunctions import *
 import math
 import parseConfig
-
-root = Tk()
-
-root.title("SAP Shortcuts")
-
-# Thanks to Chris Hairston for recommending the below graphics optimizations
-root.geometry("")
-graphicsSettings = parseConfig.parseConfig()['GRAPHICS']
-defaultFont = font.nametofont("TkDefaultFont")
-defaultFontType = defaultFont.actual("family")
-defaultFontSize = defaultFont.actual("size")
-scaledFontSize = math.ceil(defaultFontSize*float(graphicsSettings.get('SCALING', 1)))
-scaledFont = (defaultFontType, scaledFontSize)
 
 def open_button_on_click():
     newTicket()
@@ -47,7 +34,15 @@ def mail_button_on_click():
         "Q-Management": "22",
         "Delivery Issues": "23",
     }
-    child = Toplevel(root)
+    child = Tk()
+    child.geometry("")
+    child.title("Record Mail")
+    graphicsSettings = parseConfig.parseConfig()['GRAPHICS']
+    defaultFont = font.nametofont("TkDefaultFont")
+    defaultFontType = defaultFont.actual("family")
+    defaultFontSize = defaultFont.actual("size")
+    scaledFontSize = math.ceil(defaultFontSize * float(graphicsSettings.get('SCALING', 1)))
+    scaledFont = (defaultFontType, scaledFontSize)
     attach = IntVar()
     separate = IntVar()
     internal = IntVar()
@@ -97,7 +92,7 @@ def mail_button_on_click():
         return True
 
     # if mailSettings.getboolean('STOP_AT_FORTY', False):
-    validation = root.register(validate_subject)
+    validation = child.register(validate_subject)
     subj.config(validate="key", validatecommand=(validation, '%P'))
 
     def cont(event=None):
@@ -119,7 +114,8 @@ def mail_button_on_click():
 
     # child.bind("<Return>", cont)
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=cont, font=scaledFont)
-    contButton.grid(column=2, row=12)
+    contButton.grid(column=2, row=10)
+    child.mainloop()
 
 
 def time_tracking_on_click():
@@ -143,7 +139,16 @@ def zsupl4_button_on_click():
 
 
 def solution_button_on_click():
-    child = Toplevel(root)
+    # child = Toplevel(root)
+    child = Tk()
+    child.geometry("")
+    child.title("Solution")
+    graphicsSettings = parseConfig.parseConfig()['GRAPHICS']
+    defaultFont = font.nametofont("TkDefaultFont")
+    defaultFontType = defaultFont.actual("family")
+    defaultFontSize = defaultFont.actual("size")
+    scaledFontSize = math.ceil(defaultFontSize * float(graphicsSettings.get('SCALING', 1)))
+    scaledFont = (defaultFontType, scaledFontSize)
     solutionSettings = parseConfig.parseConfig()['SOLUTION']
     tktLabel = Label(child, text="Ticket Number:", font=scaledFont)
     tktNum = Entry(child, font=scaledFont)
@@ -180,49 +185,72 @@ def solution_button_on_click():
 
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=ticket_solution, font=scaledFont)
     contButton.grid(column=2, row=9)
+    child.mainloop()
 
 
 def settings_button_on_click():
     subprocess.Popen(["notepad.exe", "C:/SAP Shortcut Tool/config.ini"])
 
 
-buttonWidth = 15
-buttonHeight = 1
+def on_close(proc):
+    proc.kill()
+    root.destroy()
 
-openBtn = Button(root, text="Open New Ticket", fg="blue", height=buttonHeight,
-                 width=buttonWidth, command=open_button_on_click, font=scaledFont)
-openBtn.grid(column=2, row=2)
 
-mailBtn = Button(root, text="Record Mail", fg="blue", height=buttonHeight,
-                 width=buttonWidth, command=mail_button_on_click, font=scaledFont)
-mailBtn.grid(column=3, row=2)
+if __name__ == "__main__":
+    root = Tk()
 
-timeBtn = Button(root, text="Track Time", fg="blue", height=buttonHeight,
-                 width=buttonWidth, command=time_tracking_on_click, font=scaledFont)
-timeBtn.grid(column=4, row=2)
+    root.title("SAP Shortcuts")
 
-displayBtn = Button(root, text="Display Ticket", fg="blue", height=buttonHeight,
-                    width=buttonWidth, command=display_button_on_click, font=scaledFont)
-displayBtn.grid(column=2, row=3)
+    # Thanks to Chris Hairston for recommending the below graphics optimizations
+    root.geometry("")
+    graphicsSettings = parseConfig.parseConfig()['GRAPHICS']
+    defaultFont = font.nametofont("TkDefaultFont")
+    defaultFontType = defaultFont.actual("family")
+    defaultFontSize = defaultFont.actual("size")
+    scaledFontSize = math.ceil(defaultFontSize * float(graphicsSettings.get('SCALING', 1)))
+    scaledFont = (defaultFontType, scaledFontSize)
 
-changeBtn = Button(root, text="Change Ticket", fg="blue", height=buttonHeight,
-                   width=buttonWidth, command=change_button_on_click, font=scaledFont)
-changeBtn.grid(column=3, row=3)
+    hotkeyProc = subprocess.Popen([sys.executable, "src/hotkeys.py"], creationflags=subprocess.CREATE_NO_WINDOW)
+    root.protocol("WM_DELETE_WINDOW", lambda arg=hotkeyProc: on_close(arg))
 
-mm03Button = Button(root, text="MM03", fg="blue", height=buttonHeight,
-                    width=buttonWidth, command=mm03_button_on_click, font=scaledFont)
-mm03Button.grid(column=4, row=3)
+    buttonWidth = 15
+    buttonHeight = 1
 
-solButton = Button(root, text="Solution", fg="blue", height=buttonHeight,
-                   width=buttonWidth, command=solution_button_on_click, font=scaledFont)
-solButton.grid(column=2, row=4)
+    openBtn = Button(root, text="Open New Ticket", fg="blue", height=buttonHeight,
+                     width=buttonWidth, command=open_button_on_click, font=scaledFont)
+    openBtn.grid(column=2, row=2)
 
-zsupl4Button = Button(root, text="Ticket List", fg="blue", height=buttonHeight,
-                      width=buttonWidth, command=zsupl4_button_on_click, font=scaledFont)
-zsupl4Button.grid(column=3, row=4)
+    mailBtn = Button(root, text="Record Mail", fg="blue", height=buttonHeight,
+                     width=buttonWidth, command=mail_button_on_click, font=scaledFont)
+    mailBtn.grid(column=3, row=2)
 
-settingsButton = Button(root, text="Edit Settings", fg="blue", height=buttonHeight,
-                      width=buttonWidth, command=settings_button_on_click, font=scaledFont)
-settingsButton.grid(column=4, row=4)
+    timeBtn = Button(root, text="Track Time", fg="blue", height=buttonHeight,
+                     width=buttonWidth, command=time_tracking_on_click, font=scaledFont)
+    timeBtn.grid(column=4, row=2)
 
-root.mainloop()
+    displayBtn = Button(root, text="Display Ticket", fg="blue", height=buttonHeight,
+                        width=buttonWidth, command=display_button_on_click, font=scaledFont)
+    displayBtn.grid(column=2, row=3)
+
+    changeBtn = Button(root, text="Change Ticket", fg="blue", height=buttonHeight,
+                       width=buttonWidth, command=change_button_on_click, font=scaledFont)
+    changeBtn.grid(column=3, row=3)
+
+    mm03Button = Button(root, text="MM03", fg="blue", height=buttonHeight,
+                        width=buttonWidth, command=mm03_button_on_click, font=scaledFont)
+    mm03Button.grid(column=4, row=3)
+
+    solButton = Button(root, text="Solution", fg="blue", height=buttonHeight,
+                       width=buttonWidth, command=solution_button_on_click, font=scaledFont)
+    solButton.grid(column=2, row=4)
+
+    zsupl4Button = Button(root, text="Ticket List", fg="blue", height=buttonHeight,
+                          width=buttonWidth, command=zsupl4_button_on_click, font=scaledFont)
+    zsupl4Button.grid(column=3, row=4)
+
+    settingsButton = Button(root, text="Edit Settings", fg="blue", height=buttonHeight,
+                          width=buttonWidth, command=settings_button_on_click, font=scaledFont)
+    settingsButton.grid(column=4, row=4)
+
+    root.mainloop()

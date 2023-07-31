@@ -19,6 +19,16 @@ configSettings = {
     },
     "LOGIN": {
         "AUTO_LOGIN": "True",
+    },
+    "HOTKEYS": {
+        "NEW_TICKET": "ctrl+shift+q",
+        "RECORD_MAIL": "ctrl+shift+w",
+        "TRACK_TIME": "ctrl+shift+e",
+        "DISPLAY": "ctrl+shift+a",
+        "CHANGE": "ctrl+shift+s",
+        "MM03": "ctrl+shift+d",
+        "SOLUTION": "ctrl+shift+z",
+        "TICKET_LIST": "ctrl+shift+x",
     }
 }
 
