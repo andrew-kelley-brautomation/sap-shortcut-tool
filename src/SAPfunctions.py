@@ -289,6 +289,36 @@ def zsupl4():
             messagebox.showerror("SAP Tool", "An error occurred processing this request.")
 
 
+def quick_create():
+    outlookObj = win32com.client.Dispatch('Outlook.Application')
+    try:
+        outlookItem = outlookObj.ActiveInspector().CurrentItem
+    except:
+        try:
+            outlookItem = outlookObj.ActiveExplorer().Selection.Item(1)
+        except:
+            outlookItem = None
+    if outlookItem is None or outlookItem.Class != 43:
+        messagebox.showerror("SAP Shortcut Error", "Current Outlook Item Not An Email")
+        return
+    emailSubject = outlookItem.Subject
+    emailBody = outlookItem.Body
+    try:
+        session = openSAP()
+        if session is None:
+            return
+        session.sendCommand("/n*ZSUPPORT")
+        session.findById("wnd[0]/usr/btnSM_CREATE2").press()
+        session.findById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_1:SAPLIQS0:7322/subOBJEKT:SAPMQM00:5000/subSUBSCREEN_5000:Z_PLM_ZREPWWW_BEZUGSOBJEKT_Q5:0700/txtVIQMEL-ZZBETREFF").text = emailSubject
+        session.findById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_2:SAPLIQS0:7715/cntlTEXT/shellcont/shell").text = emailBody
+    except Exception as e:
+        if session.findById("wnd[0]/sbar").Text != "":
+            messagebox.showerror("SAP Tool", session.findById("wnd[0]/sbar").Text)
+        else:
+            messagebox.showerror("SAP Tool", "An error occurred processing this request.")
+
+
+
 def openSAP():
     pythoncom.CoInitialize()
     try:
@@ -338,4 +368,4 @@ def openSAP():
     return session
 
 if __name__ == "__main__":
-    openSAP()
+    quick_create()
