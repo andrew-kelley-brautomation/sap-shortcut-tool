@@ -116,7 +116,7 @@ def mail_button_on_click():
 
     # child.bind("<Return>", cont)
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=cont, font=scaledFont)
-    contButton.grid(column=2, row=10)
+    contButton.grid(column=2, row=12)
     child.mainloop()
 
 
