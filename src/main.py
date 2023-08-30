@@ -116,7 +116,7 @@ def mail_button_on_click():
 
     # child.bind("<Return>", cont)
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=cont, font=scaledFont)
-    contButton.grid(column=2, row=10)
+    contButton.grid(column=2, row=12)
     child.mainloop()
 
 
@@ -198,6 +198,10 @@ def quick_button_on_click():
     quick_create()
 
 
+def issue_button_on_click():
+    subprocess.Popen("https://github.com/andrew-kelley-brautomation/sap-shortcut-tool/issues")
+
+
 def on_close(proc):
     proc.kill()
     root.destroy()
@@ -228,39 +232,40 @@ if __name__ == "__main__":
     openBtn.grid(column=2, row=2)
 
     mailBtn = Button(root, text="Record Mail", fg="blue", height=buttonHeight,
-                     width=buttonWidth, command=mail_button_on_click, font=scaledFont)
-    mailBtn.grid(column=3, row=2)
+                     command=mail_button_on_click, font=scaledFont)
+    mailBtn.grid(column=1, row=1, columnspan=2, sticky="ew")
 
     timeBtn = Button(root, text="Track Time", fg="blue", height=buttonHeight,
                      width=buttonWidth, command=time_tracking_on_click, font=scaledFont)
-    timeBtn.grid(column=4, row=2)
+    timeBtn.grid(column=2, row=3)
 
     displayBtn = Button(root, text="Display Ticket", fg="blue", height=buttonHeight,
                         width=buttonWidth, command=display_button_on_click, font=scaledFont)
-    displayBtn.grid(column=2, row=3)
+    displayBtn.grid(column=3, row=2)
 
     changeBtn = Button(root, text="Change Ticket", fg="blue", height=buttonHeight,
                        width=buttonWidth, command=change_button_on_click, font=scaledFont)
-    changeBtn.grid(column=3, row=3)
+    changeBtn.grid(column=4, row=2)
 
     mm03Button = Button(root, text="MM03", fg="blue", height=buttonHeight,
                         width=buttonWidth, command=mm03_button_on_click, font=scaledFont)
-    mm03Button.grid(column=4, row=3)
+    mm03Button.grid(column=3, row=3)
 
     solButton = Button(root, text="Solution", fg="blue", height=buttonHeight,
-                       width=buttonWidth, command=solution_button_on_click, font=scaledFont)
-    solButton.grid(column=2, row=4)
+                       command=solution_button_on_click, font=scaledFont)
+    solButton.grid(column=3, row=1, columnspan=2, sticky="ew")
 
     zsupl4Button = Button(root, text="Ticket List", fg="blue", height=buttonHeight,
                           width=buttonWidth, command=zsupl4_button_on_click, font=scaledFont)
-    zsupl4Button.grid(column=3, row=4)
+    zsupl4Button.grid(column=1, row=3)
 
     settingsButton = Button(root, text="Edit Settings", fg="blue", height=buttonHeight,
-                          width=buttonWidth, command=settings_button_on_click, font=scaledFont)
-    settingsButton.grid(column=4, row=4)
+                            width=buttonWidth, command=settings_button_on_click, font=scaledFont)
+    settingsButton.grid(column=4, row=3)
 
     quickButton = Button(root, text="Quick Create", fg="blue", height=buttonHeight,
                             width=buttonWidth, command=quick_button_on_click, font=scaledFont)
-    quickButton.grid(column=2, row=5)
+    quickButton.grid(column=1, row=2)
 
     root.mainloop()
+    
