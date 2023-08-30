@@ -307,12 +307,15 @@ def quick_create():
         return
     emailSubject = outlookItem.Subject
     emailBody = outlookItem.Body
+    personnelNum = parseConfig.parseConfig()['SAP'].get('PERSONNEL_NUMBER', None)
     try:
         session = openSAP()
         if session is None:
             return
-        session.sendCommand("/n*ZSUPPORT")
-        session.findById("wnd[0]/usr/btnSM_CREATE2").press()
+        session.sendCommand("/n*IW51 RIWO00-QMART=P1")
+        session.findById("wnd[1]/usr/ctxtI_PARTNER-PERNR").Text = personnelNum
+        session.findById("wnd[1]").SendVKey(0)
+        session.findById("wnd[1]/tbar[0]/btn[26]").press()
         session.findById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_1:SAPLIQS0:7322/subOBJEKT:SAPMQM00:5000/subSUBSCREEN_5000:Z_PLM_ZREPWWW_BEZUGSOBJEKT_Q5:0700/txtVIQMEL-ZZBETREFF").text = emailSubject
         session.findById("wnd[0]/usr/tabsTAB_GROUP_10/tabp10\TAB01/ssubSUB_GROUP_10:SAPLIQS0:7235/subCUSTOM_SCREEN:SAPLIQS0:7212/subSUBSCREEN_2:SAPLIQS0:7715/cntlTEXT/shellcont/shell").text = emailBody
     except Exception as e:
@@ -377,5 +380,4 @@ def openSAP():
     return session
 
 if __name__ == "__main__":
-    session = openSAP()
-    session.StartTransaction("ZSUPPORT")
+    quick_create()
