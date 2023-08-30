@@ -335,11 +335,17 @@ def openSAP():
         session.findById('wnd[1]/usr/radMULTI_LOGON_OPT2').select()
         session.findById('wnd[1]/tbar[0]/btn[0]').press()
     else:
+        if session.findById("wnd[0]").Text == 'SAP Easy Access':
+            return session
         session.CreateSession()
-        while not (connection.Children.Count > numSessions):
+        while connection.Children.Count <= numSessions:
             pass
-    session = connection.Children(connection.Children.Count - 1)
+        ind = 1
+        while not session.findById("wnd[0]").Text == 'SAP Easy Access':
+            session = connection.Children(connection.Children.Count - ind)
+            ind += 1
     return session
 
 if __name__ == "__main__":
-    openSAP()
+    session = openSAP()
+    session.StartTransaction("ZSUPPORT")
