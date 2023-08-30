@@ -34,6 +34,10 @@ def solution():
     solution_button_on_click()
 
 
+def quick_create():
+    quick_button_on_click()
+
+
 if __name__ == "__main__":
     hotkeySettings = parseConfig.parseConfig()['HOTKEYS']
     keyboard.add_hotkey(hotkeySettings.get("NEW_TICKET", "ctrl+shift+q"), new_ticket)
@@ -44,6 +48,7 @@ if __name__ == "__main__":
     keyboard.add_hotkey(hotkeySettings.get("MM03", "ctrl+shift+d"), mm03)
     keyboard.add_hotkey(hotkeySettings.get("SOLUTION", "ctrl+shift+z"), solution)
     keyboard.add_hotkey(hotkeySettings.get("TICKET_LIST", "ctrl+shift+x"), zsupl4)
+    keyboard.add_hotkey(hotkeySettings.get("QUICK_CREATE", "ctrl+shift+c"), quick_create)
     keyboard.wait()
 
 

@@ -29,6 +29,7 @@ configSettings = {
         "MM03": "ctrl+shift+d",
         "SOLUTION": "ctrl+shift+z",
         "TICKET_LIST": "ctrl+shift+x",
+        "QUICK_CREATE": "ctrl+shift+c",
     },
     "SAP": {
         "PERSONNEL_NUMBER": "10212",
