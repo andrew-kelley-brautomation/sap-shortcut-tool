@@ -29,7 +29,10 @@ configSettings = {
         "MM03": "ctrl+shift+d",
         "SOLUTION": "ctrl+shift+z",
         "TICKET_LIST": "ctrl+shift+x",
-    }
+    },
+    "SAP": {
+        "PERSONNEL_NUMBER": "10212",
+    },
 }
 
 def parseConfig():
@@ -46,6 +49,8 @@ def parseConfig():
             parser.add_section(section)
         for option, value in settings.items():
             if not parser.has_option(section, option):
+                if option == 'PERSONNEL_NUMBER':
+                    value = simpledialog.askstring('SAP Tool', 'SAP Personnel Number:')
                 parser.set(section, option, value)
     configFile = open("C:/SAP Shortcut Tool/config.ini", "w")
     parser.write(configFile)

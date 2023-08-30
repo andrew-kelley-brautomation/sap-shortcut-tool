@@ -7,6 +7,8 @@ from SAPfunctions import *
 import math
 import parseConfig
 
+version = "1.4.0"
+
 def open_button_on_click():
     newTicket()
 
@@ -192,6 +194,10 @@ def settings_button_on_click():
     subprocess.Popen(["notepad.exe", "C:/SAP Shortcut Tool/config.ini"])
 
 
+def quick_button_on_click():
+    quick_create()
+
+
 def on_close(proc):
     proc.kill()
     root.destroy()
@@ -200,7 +206,7 @@ def on_close(proc):
 if __name__ == "__main__":
     root = Tk()
 
-    root.title("SAP Shortcuts")
+    root.title("SAP Shortcuts v" + version)
 
     # Thanks to Chris Hairston for recommending the below graphics optimizations
     root.geometry("")
@@ -252,5 +258,9 @@ if __name__ == "__main__":
     settingsButton = Button(root, text="Edit Settings", fg="blue", height=buttonHeight,
                           width=buttonWidth, command=settings_button_on_click, font=scaledFont)
     settingsButton.grid(column=4, row=4)
+
+    quickButton = Button(root, text="Quick Create", fg="blue", height=buttonHeight,
+                            width=buttonWidth, command=quick_button_on_click, font=scaledFont)
+    quickButton.grid(column=2, row=5)
 
     root.mainloop()
