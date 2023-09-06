@@ -1,4 +1,5 @@
 import subprocess
+from multiprocessing import *
 import sys
 from tkinter import *
 from tkinter import font
@@ -6,6 +7,7 @@ from tkinter.ttk import Combobox
 from SAPfunctions import *
 import math
 import parseConfig
+import hotkeys
 
 version = "1.4.0"
 
@@ -202,12 +204,17 @@ def issue_button_on_click():
     subprocess.Popen("https://github.com/andrew-kelley-brautomation/sap-shortcut-tool/issues")
 
 
+# def call_hotkeys():
+#     hotkeys.execute()
+
+
 def on_close(proc):
-    proc.kill()
+    proc.terminate()
     root.destroy()
 
 
 if __name__ == "__main__":
+    freeze_support()
     root = Tk()
 
     root.title("SAP Shortcuts v" + version)
@@ -221,7 +228,8 @@ if __name__ == "__main__":
     scaledFontSize = math.ceil(defaultFontSize * float(graphicsSettings.get('SCALING', 1)))
     scaledFont = (defaultFontType, scaledFontSize)
 
-    hotkeyProc = subprocess.Popen([sys.executable, "src/hotkeys.py"], creationflags=subprocess.CREATE_NO_WINDOW)
+    hotkeyProc = Process(target=hotkeys.execute)
+    hotkeyProc.start()
     root.protocol("WM_DELETE_WINDOW", lambda arg=hotkeyProc: on_close(arg))
 
     buttonWidth = 15
