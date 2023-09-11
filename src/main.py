@@ -39,6 +39,7 @@ def mail_button_on_click():
         "Delivery Issues": "23",
     }
     child = Tk()
+    # child = Toplevel()
     child.geometry("")
     child.title("Record Mail")
     graphicsSettings = parseConfig.parseConfig()['GRAPHICS']
@@ -105,9 +106,10 @@ def mail_button_on_click():
             subjectText = subj.get()
             emailBodyText = emailBody.get("1.0", END)
             if len(subjectText) <= 40:
+                test = typeSelector.get()
                 child.destroy()
                 recordMail(subjectText, timeSpent, True if attach.get() == 1 else False,
-                           sapTypes.get(selectedType.get()), True if internal.get() == 1 else False,
+                           sapTypes.get(test), True if internal.get() == 1 else False,
                            True if separate.get() == 1 else False, emailBodyText)
             else:
                 errorLabel.config(text=f"Subject must be less than 40 characters (Currently: {len(subjectText)})")
