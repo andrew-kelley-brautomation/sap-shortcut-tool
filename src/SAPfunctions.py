@@ -57,6 +57,8 @@ def recordMail(subject, timeSpent, attach, type, internal, separate, emailBodyTe
             return
         for ticket in tickets:
             session.SendCommand("/n*IW52 RIWO00-QMNUM=" + ticket)
+            if session.Children.Count > 1:
+                session.findById("wnd[1]/tbar[0]/btn[0]").press()
             if internal:
                 session.findById("wnd[0]/shellcont/shell").clickLink("IDAT", "Column01")
             else:
