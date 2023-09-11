@@ -80,7 +80,7 @@ def mail_button_on_click():
     typeSelector.current(0)
     typeSelector.grid(column=2, row=9)
     errorLabel = Label(child, fg="red")
-    emailBodyLabel = Label(child, text="Solution:", font=scaledFont)
+    emailBodyLabel = Label(child, text="Email Text:", font=scaledFont)
     emailBody = Text(child, width=60, height=10, font=scaledFont)
     emailBodyLabel.grid(column=2, row=10)
     emailBody.grid(column=2, row=11)
