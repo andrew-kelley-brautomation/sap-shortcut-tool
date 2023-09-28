@@ -331,12 +331,8 @@ def quick_create():
 def openSAP():
     pythoncom.CoInitialize()
     try:
-
         SapGuiAuto = win32com.client.GetObject("SAPGUI")
     except Exception as e:
-        # print(str(e))
-        # messagebox.showerror('SAP Shortcut Error', 'Please log in to SAP')
-        # return None
         if parseConfig.parseConfig()['LOGIN'].getboolean('AUTO_LOGIN', True):
             parseConfig.makeBatch()
             count = 0

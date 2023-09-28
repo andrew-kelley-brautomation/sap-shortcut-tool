@@ -9,7 +9,7 @@ import math
 import parseConfig
 import hotkeys
 
-version = "1.4.0"
+version = "1.4.1"
 
 def open_button_on_click():
     newTicket()
@@ -48,9 +48,9 @@ def mail_button_on_click():
     defaultFontSize = defaultFont.actual("size")
     scaledFontSize = math.ceil(defaultFontSize * float(graphicsSettings.get('SCALING', 1)))
     scaledFont = (defaultFontType, scaledFontSize)
-    attach = IntVar()
-    separate = IntVar()
-    internal = IntVar()
+    attach = IntVar(master=child)
+    separate = IntVar(master=child)
+    internal = IntVar(master=child)
     subjLabel = Label(child, font=scaledFont)
     subj = Entry(child, font=scaledFont)
     mailSettings = parseConfig.parseConfig()['MAIL']
@@ -72,7 +72,7 @@ def mail_button_on_click():
     attachBox.grid(column=2, row=6)
     separateBox.grid(column=2, row=7)
     internalBox.grid(column=2, row=8)
-    selectedType = StringVar()
+    selectedType = StringVar(master=child)
     typeSelector = Combobox(child, textvariable=selectedType, width=40)
     # print(list(sapTypes.keys()))
     typeSelector['values'] = list(sapTypes.keys())
@@ -100,26 +100,24 @@ def mail_button_on_click():
     validation = child.register(validate_subject)
     subj.config(validate="key", validatecommand=(validation, '%P'))
 
-    def cont(event=None):
+    def cont():
         try:
             timeSpent = int(timeAmount.get())
-            subjectText = subj.get()
-            emailBodyText = emailBody.get("1.0", END)
-            if len(subjectText) <= 40:
-                test = typeSelector.get()
+            subject = subj.get()
+            body = emailBody.get("1.0", END)
+            if len(subject) <= 40:
                 child.destroy()
-                recordMail(subjectText, timeSpent, True if attach.get() == 1 else False,
-                           sapTypes.get(test), True if internal.get() == 1 else False,
-                           True if separate.get() == 1 else False, emailBodyText)
+                recordMail(subject, timeSpent, attach.get(), sapTypes.get(selectedType.get()),
+                           internal.get(), separate.get(), body)
             else:
-                errorLabel.config(text=f"Subject must be less than 40 characters (Currently: {len(subjectText)})")
+                errorLabel.config(text=f"Subject must be less than 40 characters (Currently: {len(subject)})")
                 errorLabel.grid(column=2, row=1)
         except ValueError as e:
             errorLabel.config(text="Please enter an integer time quantity")
             errorLabel.grid(column=2, row=1)
 
     # child.bind("<Return>", cont)
-    contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=cont, font=scaledFont)
+    contButton = Button(child, text="Continue", height=1, width=60, bd=5, font=scaledFont, command=cont)
     contButton.grid(column=2, row=12)
     child.mainloop()
 
@@ -160,9 +158,9 @@ def solution_button_on_click():
     tktNum = Entry(child, font=scaledFont)
     timeLabel = Label(child, text="Time Spent:", font=scaledFont)
     timeAmount = Entry(child)
-    close = IntVar()
+    close = IntVar(master=child)
     closeBox = Checkbutton(child, text="Close Ticket", variable=close, font=scaledFont)
-    addToBody = IntVar()
+    addToBody = IntVar(master=child)
     addToBodyBox = Checkbutton(child, text="Add to Ticket Body", variable=addToBody, font=scaledFont)
     if solutionSettings.getboolean('DEFAULT_CLOSE'):
         closeBox.select()
@@ -187,7 +185,7 @@ def solution_button_on_click():
             timeSpent = 5
         child.destroy()
         addTicketSolution(ticketNum, solutionText, timeSpent,
-                          True if close.get() == 1 else False, True if addToBody.get() == 1 else False)
+                          close.get(), addToBody.get())
 
     contButton = Button(child, text="Continue", height=1, width=60, bd=5, command=ticket_solution, font=scaledFont)
     contButton.grid(column=2, row=9)
